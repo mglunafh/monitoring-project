@@ -1,5 +1,9 @@
 package org.burufi.monitoring.delivery.model
 
+import jakarta.persistence.Entity
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
 import java.math.BigDecimal
 
 /**
@@ -14,12 +18,15 @@ import java.math.BigDecimal
  *
  * @see TransportCategory
  */
+@Entity
 data class TransportType(
-    val id: Int,
-    val category: TransportCategory,
-    val mark: String,
-    val maxCargo: Int,
-    val maxDistance: Int,
-    val speed: Int,
-    val pricePerDistance: BigDecimal
+    @Id @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    var id: Int? = null,
+
+    var category: TransportCategory,
+    var mark: String,
+    var maxCargo: Int,
+    var maxDistance: Int,
+    var speed: Int,
+    var pricePerDistance: BigDecimal
 )

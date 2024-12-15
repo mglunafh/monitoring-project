@@ -3,6 +3,7 @@
 ### Current
 
 - `IPMN-2` -- implement 'Deliveries' service
+  - add repository for orders, look up for repository tests 
 
 ---------
 

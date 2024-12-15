@@ -1,3 +1,6 @@
+import org.gradle.kotlin.dsl.support.kotlinCompilerOptions
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     kotlin("jvm")
     kotlin("plugin.spring")
@@ -13,6 +16,9 @@ subprojects {
     kotlin {
         jvmToolchain {
             languageVersion.set(JavaLanguageVersion.of(21))
+        }
+        compilerOptions {
+            optIn.add("-Xjsr305=strict")
         }
     }
 
