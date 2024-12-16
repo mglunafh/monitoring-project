@@ -3,7 +3,9 @@
 ### Current
 
 - `IPMN-2` -- implement 'Deliveries' service
-  - add repository for orders, look up for repository tests 
+  - `IPMN-3` add repository tests 
+  - `IPMN-4` add controller tests
+  - `IPMN-5` add integration tests
 
 ---------
 

@@ -1,5 +1,11 @@
 package org.burufi.monitoring.delivery.model
 
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.ManyToOne
 import java.time.LocalDateTime
 
 /**
@@ -10,7 +16,7 @@ import java.time.LocalDateTime
  * @property transportType Transport type which was selected for the order, points to the [TransportType].
  * @property orderTime Time when the delivery order was registered.
  * @property status Order status of type [OrderStatus]
- * @property transportId Transport unit assigned to this delivery order, points to the [Transport].
+ * @property transport Transport unit assigned to this delivery order, points to the [Transport].
  * @property departureTime Departure time of the transport unit with the order.
  * @property arrivalTime Arrival time of the order.
  *
@@ -18,14 +24,27 @@ import java.time.LocalDateTime
  * @see Transport
  * @see OrderStatus
  */
+@Entity
 data class DeliveryOrder(
-    val id: Int,
-    val shoppingCartId: String,
-    val distance: Int,
-    val transportType: Int,
-    val orderTime: LocalDateTime,
-    var status: OrderStatus,
-    var transportId: Int,
-    var departureTime: LocalDateTime?,
-    var arrivalTime: LocalDateTime?
+    @Id @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    var id: Int? = null,
+
+    @Column(unique = true)
+    var shoppingCartId: String,
+
+    var distance: Int,
+
+    @ManyToOne
+    var transportType: TransportType,
+
+    var orderTime: LocalDateTime,
+
+    var status: OrderStatus = OrderStatus.REGISTERED,
+
+    @ManyToOne
+    var transport: Transport? = null,
+
+    var departureTime: LocalDateTime? = null,
+
+    var arrivalTime: LocalDateTime? = null
 )
