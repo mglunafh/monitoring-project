@@ -1,5 +1,6 @@
 package org.burufi.monitoring.delivery
 
+import org.burufi.monitoring.delivery.dto.CreateDeliveryOrderDto
 import org.burufi.monitoring.delivery.model.DeliveryOrder
 import org.burufi.monitoring.delivery.model.TransportCategory.QUADCOPTER
 import org.burufi.monitoring.delivery.model.TransportCategory.TRUCK
@@ -44,4 +45,10 @@ val TEST_ORDER = DeliveryOrder(
     distance = 100,
     transportType = TEST_GAZELLE,
     orderTime = LocalDateTime.of(2020, 1, 1, 10, 30, 0)
+)
+
+val TEST_CREATE_ORDER_DTO = CreateDeliveryOrderDto(
+    shoppingCartId = TEST_SHOPPING_CART,
+    transportMark = GAZELLE_MARK,
+    distance = 150
 )
