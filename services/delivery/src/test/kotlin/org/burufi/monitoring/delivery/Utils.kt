@@ -1,6 +1,7 @@
 package org.burufi.monitoring.delivery
 
 import org.burufi.monitoring.delivery.dto.CreateDeliveryOrderDto
+import org.burufi.monitoring.delivery.mapper.OrderMapper
 import org.burufi.monitoring.delivery.model.DeliveryOrder
 import org.burufi.monitoring.delivery.model.TransportCategory.QUADCOPTER
 import org.burufi.monitoring.delivery.model.TransportCategory.TRUCK
@@ -11,6 +12,8 @@ import java.time.LocalDateTime
 const val TEST_MARK = "Test Mark"
 const val GAZELLE_MARK = "Test Gazelle"
 const val GEORADAR_MARK = "Test GeoRadar"
+val ORDER_TIME: LocalDateTime = LocalDateTime.of(2020, 1, 1, 10, 30, 0)
+const val ORDER_TIME_AS_STRING = "2020-01-01 10:30:00.000"
 
 const val TEST_SHOPPING_CART = "first-shopping-cart"
 
@@ -44,7 +47,7 @@ val TEST_ORDER = DeliveryOrder(
     shoppingCartId = TEST_SHOPPING_CART,
     distance = 100,
     transportType = TEST_GAZELLE,
-    orderTime = LocalDateTime.of(2020, 1, 1, 10, 30, 0)
+    orderTime = ORDER_TIME
 )
 
 val TEST_CREATE_ORDER_DTO = CreateDeliveryOrderDto(
@@ -52,3 +55,5 @@ val TEST_CREATE_ORDER_DTO = CreateDeliveryOrderDto(
     transportMark = GAZELLE_MARK,
     distance = 150
 )
+
+val TEST_DELIVERY_ORDER_DTO = OrderMapper.map(TEST_ORDER.copy(id = 1349))

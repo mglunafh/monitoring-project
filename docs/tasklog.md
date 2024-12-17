@@ -4,6 +4,7 @@
 
 - `IPMN-2` -- implement 'Deliveries' service
   - `IPMN-5` add integration tests
+  - `IPMN-6` fix object mapper date time serialization format issue
 
 ---------
 

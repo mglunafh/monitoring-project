@@ -14,8 +14,9 @@ class MainConfig {
     @Bean
     fun objectMapper(builder: Jackson2ObjectMapperBuilder): ObjectMapper {
 
-        // TODO somehow dateformat here is not picked up, forced to @JsonFormat on response DTO field;
-        //      also "yyyy-MM-dd HH:mm:ss.SSSZ" for time with zoneId
+        // TODO IPMN-6
+        //  somehow dateformat here is not picked up, forced to @JsonFormat on response DTO field;
+        //  also "yyyy-MM-dd HH:mm:ss.SSSZ" for time with zoneId
         val formatString = "yyyy-MM-dd HH:mm:ss.SSS"
         val dateFormat = SimpleDateFormat(formatString)
         val formatter = DateTimeFormatter.ofPattern(formatString)

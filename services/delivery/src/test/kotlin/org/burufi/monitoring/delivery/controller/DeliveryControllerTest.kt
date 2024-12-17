@@ -2,8 +2,11 @@ package org.burufi.monitoring.delivery.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.burufi.monitoring.delivery.GAZELLE_MARK
+import org.burufi.monitoring.delivery.ORDER_TIME_AS_STRING
 import org.burufi.monitoring.delivery.TEST_CREATE_ORDER_DTO
+import org.burufi.monitoring.delivery.TEST_DELIVERY_ORDER_DTO
 import org.burufi.monitoring.delivery.TEST_ORDER
+import org.burufi.monitoring.delivery.TEST_SHOPPING_CART
 import org.burufi.monitoring.delivery.dto.CreateDeliveryOrderDto
 import org.burufi.monitoring.delivery.exception.DeliveryException
 import org.burufi.monitoring.delivery.exception.FailureType
@@ -42,7 +45,7 @@ class DeliveryControllerTest {
             .andExpect(MockMvcResultMatchers.status().isOk)
             .andExpect(MockMvcResultMatchers.jsonPath("$.responseCode").value("OK"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.orderId").value(666))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.orderTime").value("2020-01-01 10:30:00.000"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.orderTime").value(ORDER_TIME_AS_STRING))
     }
 
     @Test
@@ -82,5 +85,19 @@ class DeliveryControllerTest {
             .andExpect(MockMvcResultMatchers.status().isBadRequest)
             .andExpect(MockMvcResultMatchers.jsonPath("$.responseCode").value("VALIDATION_FAILURE"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value(DeliveryExceptionHandler.INCORRECT_TRANSPORT_MARK))
+    }
+
+    @Test
+    fun `test ongoing orders`() {
+        Mockito.doReturn(listOf(TEST_DELIVERY_ORDER_DTO)).`when`(orderService).getOngoing()
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/delivery/ongoing")
+            .accept(APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.responseCode").value("OK"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.orders[0].id").value(1349))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.orders[0].shoppingCartId").value(TEST_SHOPPING_CART))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.orders[0].distance").value(100))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.orders[0].orderTime").value(ORDER_TIME_AS_STRING))
     }
 }
