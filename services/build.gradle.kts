@@ -3,8 +3,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm")
-    kotlin("plugin.spring")
-    id("org.springframework.boot")
 }
 
 subprojects {
@@ -18,12 +16,16 @@ subprojects {
             languageVersion.set(JavaLanguageVersion.of(21))
         }
         compilerOptions {
-            optIn.add("-Xjsr305=strict")
+            optIn.add("-Xjsr305=strict")    // TODO not sure where it belongs exactly....
         }
     }
 
     repositories {
         mavenCentral()
+    }
+
+    tasks.test {
+        useJUnitPlatform()
     }
 }
 
