@@ -2,9 +2,12 @@ package org.burufi.monitoring.delivery.service
 
 import jakarta.transaction.Transactional
 import org.burufi.monitoring.delivery.dto.CreateDeliveryOrderDto
+import org.burufi.monitoring.delivery.dto.DeliveryOrderDto
 import org.burufi.monitoring.delivery.exception.DeliveryException
 import org.burufi.monitoring.delivery.exception.FailureType
+import org.burufi.monitoring.delivery.mapper.OrderMapper
 import org.burufi.monitoring.delivery.model.DeliveryOrder
+import org.burufi.monitoring.delivery.model.OrderStatus
 import org.burufi.monitoring.delivery.repository.OrderRepository
 import org.burufi.monitoring.delivery.repository.TransportTypeRepository
 import org.springframework.stereotype.Service
@@ -12,8 +15,8 @@ import java.time.LocalDateTime
 
 @Service
 class DeliveryOrderService(
-    val orderRepo: OrderRepository,
-    val transportTypeRepo: TransportTypeRepository
+    private val orderRepo: OrderRepository,
+    private val transportTypeRepo: TransportTypeRepository
 ) {
 
     @Transactional(rollbackOn = [DeliveryException::class])
@@ -34,5 +37,11 @@ class DeliveryOrderService(
         orderRepo.save(order)
 
         return order
+    }
+
+    @Transactional
+    fun getOngoing(): List<DeliveryOrderDto> {
+        val ongoingOrders = orderRepo.findByStatus(OrderStatus.REGISTERED)
+        return ongoingOrders.map { OrderMapper.map(it) }
     }
 }
