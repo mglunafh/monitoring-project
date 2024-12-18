@@ -8,7 +8,9 @@ import org.burufi.monitoring.delivery.exception.FailureType
 import org.burufi.monitoring.delivery.mapper.OrderMapper
 import org.burufi.monitoring.delivery.model.DeliveryOrder
 import org.burufi.monitoring.delivery.model.OrderStatus
+import org.burufi.monitoring.delivery.model.TransportStatus
 import org.burufi.monitoring.delivery.repository.OrderRepository
+import org.burufi.monitoring.delivery.repository.TransportRepository
 import org.burufi.monitoring.delivery.repository.TransportTypeRepository
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -16,7 +18,9 @@ import java.time.LocalDateTime
 @Service
 class DeliveryOrderService(
     private val orderRepo: OrderRepository,
-    private val transportTypeRepo: TransportTypeRepository
+    private val transportTypeRepo: TransportTypeRepository,
+    private val transportRepo: TransportRepository,
+    private val backgroundManager: BackgroundOrderManager
 ) {
 
     @Transactional(rollbackOn = [DeliveryException::class])
@@ -32,16 +36,26 @@ class DeliveryOrderService(
             shoppingCartId = createOrder.shoppingCartId,
             distance = createOrder.distance,
             transportType = transportType,
-            orderTime = LocalDateTime.now()
+            orderTime = LocalDateTime.now(),
         )
-        orderRepo.save(order)
 
-        return order
+        val availableTransport = transportRepo.findFirstByTransportTypeMarkAndStatus(mark)
+        if (availableTransport != null) {
+            availableTransport.status = TransportStatus.DELIVERING
+            order.transport = availableTransport
+            order.status = OrderStatus.SENT
+            order.departureTime = LocalDateTime.now()
+        }
+
+        val createdOrder = orderRepo.save(order)
+        backgroundManager.sendOrder(createdOrder)
+
+        return createdOrder
     }
 
     @Transactional
     fun getOngoing(): List<DeliveryOrderDto> {
-        val ongoingOrders = orderRepo.findByStatus(OrderStatus.REGISTERED)
+        val ongoingOrders = orderRepo.findByStatusIn(OrderStatus.REGISTERED, OrderStatus.SENT)
         return ongoingOrders.map { OrderMapper.map(it) }
     }
 }

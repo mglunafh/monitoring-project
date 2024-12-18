@@ -1,6 +1,8 @@
 package org.burufi.monitoring.delivery.repository
 
 import org.assertj.core.api.Assertions.assertThat
+import org.burufi.monitoring.delivery.GAZELLE_MARK
+import org.burufi.monitoring.delivery.GEORADAR_MARK
 import org.burufi.monitoring.delivery.TEST_GAZELLE
 import org.burufi.monitoring.delivery.TEST_ORDER
 import org.burufi.monitoring.delivery.TEST_QUADCOPTER
@@ -49,18 +51,46 @@ class OrderRepositoryTest {
         testEntityManager.persist(gazelle)
         testEntityManager.persist(smol)
 
-        val testOrder1 = TEST_ORDER.copy(shoppingCartId = "first-gazelle-order", transportType = gazelle)
-        val testOrder2 = TEST_ORDER.copy(shoppingCartId = "second-gazelle-order", transportType = gazelle)
-        val testOrder3 = TEST_ORDER.copy(shoppingCartId = "first-quick-order", transportType = smol)
+        val order1 = TEST_ORDER.copy(shoppingCartId = "first-gazelle-order", transportType = gazelle)
+        val order2 = TEST_ORDER.copy(shoppingCartId = "second-gazelle-order", transportType = gazelle)
+        val sentOrder = TEST_ORDER.copy(shoppingCartId = "first-sent-order", transportType = smol, status = SENT)
+        val order4 = TEST_ORDER.copy(shoppingCartId = "first-quick-order", transportType = smol)
         val finished = TEST_ORDER.copy(shoppingCartId = "finished-order", transportType = gazelle, status = DELIVERED)
-        listOf(testOrder1, testOrder2, testOrder3, finished).forEach { testEntityManager.persist(it) }
+        listOf(order1, order2, sentOrder, order4, finished).forEach { testEntityManager.persist(it) }
 
-        val resultRegistered = repo.findByStatus(REGISTERED)
-        val resultSent = repo.findByStatus(SENT)
-        val resultFinished = repo.findByStatus(DELIVERED)
+        val resultRegistered = repo.findByStatusIn(REGISTERED)
+        val resultSent = repo.findByStatusIn(SENT)
+        val resultFinished = repo.findByStatusIn(DELIVERED)
+        val resultOngoing = repo.findByStatusIn(REGISTERED, SENT)
 
-        assertThat(resultRegistered).containsExactly(testOrder1, testOrder2, testOrder3)
-        assertThat(resultSent).isEmpty()
+        assertThat(resultRegistered).containsExactly(order1, order2, order4)
+        assertThat(resultSent).containsExactly(sentOrder)
         assertThat(resultFinished).containsExactly(finished)
+        assertThat(resultOngoing).containsExactly(order1, order2, sentOrder, order4)
+    }
+
+    @Test
+    fun `test findAwaitingOrder, queue is empty`() {
+        val result = repo.findAwaitingOrder(GAZELLE_MARK)
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun `test findAwaitingOrder`() {
+        val gazelle = TEST_GAZELLE.copy()
+        val georadar = TEST_QUADCOPTER.copy()
+        testEntityManager.persist(gazelle)
+        testEntityManager.persist(georadar)
+
+        val georadarOrder = TEST_ORDER.copy(shoppingCartId = "first-georadar-order", transportType = georadar)
+        val order1 = TEST_ORDER.copy(shoppingCartId = "first-sent-order", transportType = gazelle, status = SENT)
+        val order2 = TEST_ORDER.copy(shoppingCartId = "second-gazelle-order", transportType = gazelle)
+        val order3 = TEST_ORDER.copy(shoppingCartId = "third-gazelle-order", transportType = gazelle)
+        listOf(georadarOrder, order1, order2, order3).forEach { testEntityManager.persist(it) }
+
+        val gazResult = repo.findAwaitingOrder(GAZELLE_MARK)
+        assertThat(gazResult).isEqualTo(order2)
+        val geoResult = repo.findAwaitingOrder(GEORADAR_MARK)
+        assertThat(geoResult).isEqualTo(georadarOrder)
     }
 }

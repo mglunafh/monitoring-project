@@ -25,7 +25,7 @@ class DeliveryController(
     @PostMapping
     fun createDeliveryOrder(@Valid @RequestBody orderDto: CreateDeliveryOrderDto, errors: Errors): ResponseEntity<DeliveryResponse> {
         if (errors.hasErrors()) {
-            val message = errors.allErrors.joinToString(separator = ". ") { it.defaultMessage }
+            val message = errors.allErrors.joinToString(separator = ". ") { it.defaultMessage ?: "" }
             return ResponseEntity.badRequest().body(ErrorResponse(ResponseCode.VALIDATION_FAILURE, message))
         }
         val createdOrder = orderService.create(orderDto)

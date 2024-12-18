@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.ManyToOne
+import java.math.BigDecimal
 import java.time.LocalDateTime
 
 /**
@@ -46,5 +47,7 @@ data class DeliveryOrder(
 
     var departureTime: LocalDateTime? = null,
 
-    var arrivalTime: LocalDateTime? = null
+    var arrivalTime: LocalDateTime? = null,
+
+    var cost: BigDecimal? = null
 )

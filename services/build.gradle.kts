@@ -16,7 +16,7 @@ subprojects {
             languageVersion.set(JavaLanguageVersion.of(21))
         }
         compilerOptions {
-            optIn.add("-Xjsr305=strict")    // TODO not sure where it belongs exactly....
+            freeCompilerArgs.addAll("-Xjsr305=strict", "-Xjvm-default=all-compatibility")
         }
     }
 
