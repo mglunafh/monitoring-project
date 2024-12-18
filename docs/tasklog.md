@@ -10,6 +10,6 @@
 
 ### Done
 
-- `IPMN-4` add MockMvc tests
+- `IPMN-4` -- add MockMvc tests
 - `IPMN-3` -- add repository tests (`@DataJpaTest`)
 - `IPMN-1` -- create a structure of the project

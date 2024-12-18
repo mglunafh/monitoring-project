@@ -2,6 +2,7 @@ package org.burufi.monitoring.delivery
 
 import org.burufi.monitoring.delivery.model.Transport
 import org.burufi.monitoring.delivery.model.TransportCategory
+import org.burufi.monitoring.delivery.model.TransportStatus
 import org.burufi.monitoring.delivery.model.TransportType
 import org.burufi.monitoring.delivery.repository.TransportRepository
 import org.burufi.monitoring.delivery.repository.TransportTypeRepository
@@ -33,6 +34,19 @@ class TransportPopulator(
         parkRepository.findAll().forEach {
             println("Transport(id=${it.id}, category=${it.transportType.category}, mark=${it.transportType.mark}, status=${it.status})")
         }
+
+        println("=========== AVAILABLE")
+
+        parkRepository.findByStatusAndTransportTypeMark(TransportStatus.AVAILABLE, GAZELLE).forEach {
+            println("Transport(id=${it.id}, category=${it.transportType.category}, mark=${it.transportType.mark}, status=${it.status})")
+        }
+
+        println("=========== FIRST AVAILABLE")
+
+        parkRepository.findFirstByTransportTypeMarkAndStatus(GAZELLE)?.let {
+            println("Transport(id=${it.id}, category=${it.transportType.category}, mark=${it.transportType.mark}, status=${it.status})")
+        }
+
     }
 
     private fun transportTypes() {
