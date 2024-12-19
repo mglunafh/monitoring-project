@@ -9,15 +9,15 @@ import org.burufi.monitoring.delivery.model.OrderStatus
 object OrderMapper {
 
     fun map(order: DeliveryOrder) = DeliveryOrderDto(
-            id = order.id!!,
-            shoppingCartId = order.shoppingCartId,
-            distance = order.distance,
-            transportMark = order.transportType.mark,
-            orderTime = order.orderTime,
-            status = order.status,
-            departureTime = order.departureTime,
-            arrivalTime = order.arrivalTime
-        )
+        id = order.id!!,
+        shoppingCartId = order.shoppingCartId,
+        distance = order.distance,
+        transportMark = order.transportType.mark,
+        orderTime = order.orderTime,
+        status = order.status,
+        departureTime = order.departureTime,
+        arrivalTime = order.arrivalTime
+    )
 
     fun map(orderStatistics: OrderStatistics) = OrderStatisticsDto(
         status = OrderStatus.SENT,
