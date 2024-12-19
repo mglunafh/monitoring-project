@@ -4,7 +4,8 @@
 
 - `IPMN-2` -- implement 'Deliveries' service
   - `IPMN-5` add integration tests
-  - `IPMN-6` fix object mapper date time serialization format issue
+    - write down use cases 
+    - create different profiles for H2 / MariaDB / PostgreSQL
 - `IPMN-10` -- Monitoring
   - `IPMN-11` -- add monitoring to 'Deliveries'
 
@@ -12,6 +13,7 @@
 
 ### Done
 
+- `IPMN-6` -- Customize LocalDateTime serialization format for Spring Boot ObjectMapper
 - `IPMN-9` -- implement `stats` endpoint
 - `IPMN-8` -- split `FailureType` into two parts
 - `IPMN-7` -- implement background order/transport manager

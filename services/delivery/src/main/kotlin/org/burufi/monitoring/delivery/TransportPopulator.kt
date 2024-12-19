@@ -13,7 +13,7 @@ import java.math.BigDecimal
 @Component
 class TransportPopulator(
     val transportTypeRepository: TransportTypeRepository,
-    var parkRepository: TransportRepository
+    val parkRepository: TransportRepository
 ) : CommandLineRunner {
 
     companion object {

@@ -56,4 +56,8 @@ val TEST_CREATE_ORDER_DTO = CreateDeliveryOrderDto(
     distance = 150
 )
 
+val TEST_CREATE_ORDER_REQUEST = """
+            {"shoppingCartId": "$TEST_SHOPPING_CART", "transportMark": "$GAZELLE_MARK", "distance": 150 }
+        """.trimIndent()
+
 val TEST_DELIVERY_ORDER_DTO = OrderMapper.map(TEST_ORDER.copy(id = 1349))
