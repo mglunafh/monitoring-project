@@ -7,6 +7,7 @@ import org.burufi.monitoring.delivery.exception.DeliveryException
 import org.burufi.monitoring.delivery.exception.FailureType
 import org.burufi.monitoring.delivery.mapper.OrderMapper
 import org.burufi.monitoring.delivery.model.DeliveryOrder
+import org.burufi.monitoring.delivery.model.OrderStatistics
 import org.burufi.monitoring.delivery.model.OrderStatus
 import org.burufi.monitoring.delivery.model.TransportStatus
 import org.burufi.monitoring.delivery.repository.OrderRepository
@@ -57,5 +58,10 @@ class DeliveryOrderService(
     fun getOngoing(): List<DeliveryOrderDto> {
         val ongoingOrders = orderRepo.findByStatusIn(OrderStatus.REGISTERED, OrderStatus.SENT)
         return ongoingOrders.map { OrderMapper.map(it) }
+    }
+
+    @Transactional
+    fun getStatistics(): List<OrderStatistics> {
+        return orderRepo.findOrderStatistics()
     }
 }

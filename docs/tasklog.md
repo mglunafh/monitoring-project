@@ -5,12 +5,12 @@
 - `IPMN-2` -- implement 'Deliveries' service
   - `IPMN-5` add integration tests
   - `IPMN-6` fix object mapper date time serialization format issue
-  - `IPMN-9` implement `costs` endpoint
 
 ---------
 
 ### Done
 
+- `IPMN-9` -- implement `stats` endpoint
 - `IPMN-8` -- split `FailureType` into two parts
 - `IPMN-7` -- implement background order/transport manager
 - `IPMN-4` -- add MockMvc tests

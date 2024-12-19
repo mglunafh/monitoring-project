@@ -3,19 +3,19 @@ package org.burufi.monitoring.delivery.model
 /**
  * Type of the status of a delivery order.
  */
-enum class OrderStatus {
+enum class OrderStatus(val code: String) {
     /**
      * Delivery order is registered.
      */
-    REGISTERED,
+    REGISTERED("R"),
 
     /**
      * Delivery order is on its way to the destination.
      */
-    SENT,
+    SENT("S"),
 
     /**
      * Order is delivered.
      */
-    DELIVERED
+    DELIVERED("D")
 }

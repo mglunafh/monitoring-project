@@ -6,7 +6,9 @@ import org.burufi.monitoring.delivery.dto.CreateDeliveryOrderResponse
 import org.burufi.monitoring.delivery.dto.DeliveryResponse
 import org.burufi.monitoring.delivery.dto.ErrorResponse
 import org.burufi.monitoring.delivery.dto.ListOrderResponse
+import org.burufi.monitoring.delivery.dto.OrderStatisticsResponse
 import org.burufi.monitoring.delivery.dto.ResponseCode
+import org.burufi.monitoring.delivery.mapper.OrderMapper
 import org.burufi.monitoring.delivery.service.DeliveryOrderService
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.Errors
@@ -34,8 +36,15 @@ class DeliveryController(
     }
 
     @GetMapping("/ongoing")
-    fun showOngoingOrders(): ResponseEntity<ListOrderResponse?> {
+    fun showOngoingOrders(): ResponseEntity<ListOrderResponse> {
         val ongoingOrders = orderService.getOngoing()
         return ResponseEntity.ok(ListOrderResponse(ongoingOrders))
+    }
+
+    @GetMapping("/stats")
+    fun showStatistics(): ResponseEntity<OrderStatisticsResponse> {
+        val statistics = orderService.getStatistics()
+        val statisticsDto = statistics.map { OrderMapper.map(it) }
+        return ResponseEntity.ok(OrderStatisticsResponse(statisticsDto))
     }
 }

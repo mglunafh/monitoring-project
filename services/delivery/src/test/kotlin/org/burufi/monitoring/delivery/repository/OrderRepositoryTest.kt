@@ -1,6 +1,8 @@
 package org.burufi.monitoring.delivery.repository
 
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.tuple
+import org.assertj.core.api.recursive.comparison.RecursiveComparisonConfiguration
 import org.burufi.monitoring.delivery.GAZELLE_MARK
 import org.burufi.monitoring.delivery.GEORADAR_MARK
 import org.burufi.monitoring.delivery.TEST_GAZELLE
@@ -13,6 +15,7 @@ import org.burufi.monitoring.delivery.model.OrderStatus.SENT
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
+import java.math.BigDecimal
 import kotlin.test.Test
 
 @DataJpaTest
@@ -92,5 +95,46 @@ class OrderRepositoryTest {
         assertThat(gazResult).isEqualTo(order2)
         val geoResult = repo.findAwaitingOrder(GEORADAR_MARK)
         assertThat(geoResult).isEqualTo(georadarOrder)
+    }
+
+    @Test
+    fun `Test order statistics`() {
+        val gazelle = TEST_GAZELLE.copy()
+        val georadar = TEST_QUADCOPTER.copy()
+        testEntityManager.persist(gazelle)
+        testEntityManager.persist(georadar)
+
+        val completed1 = TEST_ORDER.copy(shoppingCartId = "first-finished", transportType = gazelle, status = DELIVERED, cost = BigDecimal(120))
+        val completed2 = TEST_ORDER.copy(shoppingCartId = "second-finished", transportType = georadar, status = DELIVERED, cost = BigDecimal(330))
+
+        val sent1 = TEST_ORDER.copy(shoppingCartId = "first-sent", transportType = gazelle, status = SENT)
+
+        val order1 = TEST_ORDER.copy(shoppingCartId = "first-registered-order", transportType = georadar)
+        val order2 = TEST_ORDER.copy(shoppingCartId = "second-registered-order", transportType = gazelle)
+        val order3 = TEST_ORDER.copy(shoppingCartId = "third-registered-order", transportType = georadar)
+
+        listOf(completed1, completed2, sent1, order1, order2, order3).forEach { testEntityManager.persist(it) }
+
+        val expenses = repo.findOrderStatistics()
+
+        assertThat(expenses).extracting("status", "orderCount", "totalCost")
+            .usingRecursiveFieldByFieldElementComparator(
+                RecursiveComparisonConfiguration.builder()
+                    .withComparatorForType(bigDecimalComparator, BigDecimal::class.java)
+                    .build())
+            .contains(
+                tuple(REGISTERED, 3, null),
+                tuple(SENT, 1, null),
+                tuple(DELIVERED, 2, BigDecimal(450)),
+        )
+    }
+
+    private val bigDecimalComparator : Comparator<BigDecimal> = Comparator { o1: BigDecimal?, o2: BigDecimal? ->
+        when {
+            o1 == null && o2 == null -> 0
+            o1 == null -> -1
+            o2 == null -> 1
+            else -> o1.compareTo(o2)
+        }
     }
 }

@@ -27,7 +27,7 @@ class BackgroundOrderService(
 
     @Transactional(rollbackOn = [DeliveryBackgroundException::class])
     fun deliverOrder(orderId: Int, transportId: Int, cost: BigDecimal) {
-        log.info("Order {} delivered", orderId)
+        log.info("Order {} delivered, total expenses: {}", orderId, cost)
 
         val order = orderRepo.findByIdOrNull(orderId)
         if (order == null) throw OrderIdNotFound(orderId).asException()
