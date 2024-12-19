@@ -1,8 +1,11 @@
 package org.burufi.monitoring.delivery.service
 
 import jakarta.transaction.Transactional
-import org.burufi.monitoring.delivery.exception.DeliveryException
-import org.burufi.monitoring.delivery.exception.FailureType
+import org.burufi.monitoring.delivery.exception.BackgroundFailureType.OrderIdNotFound
+import org.burufi.monitoring.delivery.exception.BackgroundFailureType.TransportIdNotFound
+import org.burufi.monitoring.delivery.exception.BackgroundFailureType.UnexpectedOrderStatus
+import org.burufi.monitoring.delivery.exception.BackgroundFailureType.UnexpectedTransportStatus
+import org.burufi.monitoring.delivery.exception.DeliveryBackgroundException
 import org.burufi.monitoring.delivery.model.OrderStatus
 import org.burufi.monitoring.delivery.model.TransportStatus
 import org.burufi.monitoring.delivery.repository.OrderRepository
@@ -22,21 +25,23 @@ class BackgroundOrderService(
 
     private val log = LoggerFactory.getLogger(javaClass)
 
-    @Transactional(rollbackOn = [DeliveryException::class])
+    @Transactional(rollbackOn = [DeliveryBackgroundException::class])
     fun deliverOrder(orderId: Int, transportId: Int, cost: BigDecimal) {
         log.info("Order {} delivered", orderId)
 
         val order = orderRepo.findByIdOrNull(orderId)
-        if (order == null) throw DeliveryException(FailureType.ORDER_ID_NOT_FOUND)
+        if (order == null) throw OrderIdNotFound(orderId).asException()
 
         val transport = transportRepo.findByIdOrNull(transportId)
-        if (transport == null) throw DeliveryException(FailureType.TRANSPORT_ID_NOT_FOUND)
+        if (transport == null) throw TransportIdNotFound(transportId).asException()
 
         val orderStatus = order.status
-        if (orderStatus != OrderStatus.SENT) throw DeliveryException(FailureType.ORDER_DID_NOT_HAVE_STATUS_SENT)
+        if (orderStatus != OrderStatus.SENT) throw UnexpectedOrderStatus(OrderStatus.SENT, orderStatus).asException()
 
         val transportStatus = transport.status
-        if (transportStatus != TransportStatus.DELIVERING) throw DeliveryException(FailureType.TRANSPORT_DID_NOT_HAVE_STATUS_DELIVERING)
+        if (transportStatus != TransportStatus.DELIVERING) {
+            throw UnexpectedTransportStatus(TransportStatus.DELIVERING, transportStatus).asException()
+        }
 
         order.status = OrderStatus.DELIVERED
         order.arrivalTime = LocalDateTime.now()
@@ -47,15 +52,17 @@ class BackgroundOrderService(
         transportRepo.save(transport)
     }
 
-    @Transactional(rollbackOn = [DeliveryException::class])
+    @Transactional(rollbackOn = [DeliveryBackgroundException::class])
     fun returnTransport(transportId: Int): OrderCapture? {
         log.info("Transport {} returns back to the park", transportId)
 
         val transport = transportRepo.findByIdOrNull(transportId)
-        if (transport == null) throw DeliveryException(FailureType.TRANSPORT_ID_NOT_FOUND)
+        if (transport == null) throw DeliveryBackgroundException(TransportIdNotFound(transportId))
 
         val transportStatus = transport.status
-        if (transportStatus != TransportStatus.RETURNING) throw DeliveryException(FailureType.TRANSPORT_DID_NOT_HAVE_STATUS_RETURNING)
+        if (transportStatus != TransportStatus.RETURNING) {
+            throw DeliveryBackgroundException(UnexpectedTransportStatus(TransportStatus.RETURNING, transportStatus))
+        }
 
         val awaiting = orderRepo.findAwaitingOrder(transport.transportType.mark)
         return if (awaiting == null) {

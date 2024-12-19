@@ -3,7 +3,6 @@ package org.burufi.monitoring.delivery.controller
 import org.burufi.monitoring.delivery.dto.ErrorResponse
 import org.burufi.monitoring.delivery.dto.ResponseCode
 import org.burufi.monitoring.delivery.exception.DeliveryException
-import org.burufi.monitoring.delivery.exception.FailureType
 import org.burufi.monitoring.delivery.exception.FailureType.SHOPPING_CART_ID_ALREADY_EXISTS
 import org.burufi.monitoring.delivery.exception.FailureType.TRANSPORT_MARK_NOT_FOUND
 import org.springframework.http.ResponseEntity
@@ -26,13 +25,6 @@ class DeliveryExceptionHandler {
 
             SHOPPING_CART_ID_ALREADY_EXISTS -> ResponseEntity.badRequest().body(
                 ErrorResponse(ResponseCode.VALIDATION_FAILURE, SHOPPING_CARD_ALREADY_REGISTERED))
-
-            // TODO IPMN-7
-            FailureType.ORDER_ID_NOT_FOUND -> TODO()
-            FailureType.TRANSPORT_ID_NOT_FOUND -> TODO()
-            FailureType.ORDER_DID_NOT_HAVE_STATUS_SENT -> TODO()
-            FailureType.TRANSPORT_DID_NOT_HAVE_STATUS_DELIVERING -> TODO()
-            FailureType.TRANSPORT_DID_NOT_HAVE_STATUS_RETURNING -> TODO()
         }
     }
 }
