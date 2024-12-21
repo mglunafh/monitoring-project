@@ -2,6 +2,8 @@ package org.burufi.monitoring.delivery.config
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer
@@ -23,6 +25,9 @@ class ObjectMapperConfig {
         it.simpleDateFormat(DATE_TIME_FORMAT)
         it.serializers(LocalDateTimeSerializer(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)))
         it.serializers(LocalDateSerializer(DateTimeFormatter.ofPattern(DATE_FORMAT)))
+
+        it.deserializers(LocalDateTimeDeserializer(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)))
+        it.deserializers(LocalDateDeserializer(DateTimeFormatter.ofPattern(DATE_FORMAT)))
     }
 
     @Bean

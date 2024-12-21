@@ -43,8 +43,8 @@ class DeliveryControllerTest {
             .accept(APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.status().isOk)
             .andExpect(MockMvcResultMatchers.jsonPath("$.responseCode").value("OK"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.orderId").value(666))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.orderTime").value(ORDER_TIME_AS_STRING))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.payload.orderId").value(666))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.payload.orderTime").value(ORDER_TIME_AS_STRING))
     }
 
     @Test
@@ -96,9 +96,10 @@ class DeliveryControllerTest {
             .accept(APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.status().isOk)
             .andExpect(MockMvcResultMatchers.jsonPath("$.responseCode").value("OK"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.orders[0].id").value(1349))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.orders[0].shoppingCartId").value(TEST_SHOPPING_CART))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.orders[0].distance").value(100))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.orders[0].orderTime").value(ORDER_TIME_AS_STRING))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.payload.orders[0].id").value(1349))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.payload.orders[0].shoppingCartId").value(TEST_SHOPPING_CART))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.payload.orders[0].distance").value(100))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.payload.orders[0].orderTime").value(ORDER_TIME_AS_STRING))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.payload.orders[1]").doesNotExist())
     }
 }

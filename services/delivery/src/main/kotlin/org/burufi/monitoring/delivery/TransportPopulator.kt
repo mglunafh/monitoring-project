@@ -7,10 +7,12 @@ import org.burufi.monitoring.delivery.model.TransportType
 import org.burufi.monitoring.delivery.repository.TransportRepository
 import org.burufi.monitoring.delivery.repository.TransportTypeRepository
 import org.springframework.boot.CommandLineRunner
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
 
 @Component
+@Profile("default")
 class TransportPopulator(
     val transportTypeRepository: TransportTypeRepository,
     val parkRepository: TransportRepository

@@ -13,6 +13,7 @@
 
 ### Done
 
+- `IPMN-12` -- fix response model, introduce 'payload' field (kinda blocks integration testing)
 - `IPMN-6` -- Customize LocalDateTime serialization format for Spring Boot ObjectMapper
 - `IPMN-9` -- implement `stats` endpoint
 - `IPMN-8` -- split `FailureType` into two parts
