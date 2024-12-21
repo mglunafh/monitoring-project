@@ -11,19 +11,14 @@ import org.burufi.monitoring.delivery.repository.OrderRepository
 import org.burufi.monitoring.delivery.typeRef
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
-import org.springframework.test.context.ActiveProfiles
 import kotlin.test.Test
 
-@SpringBootTest(webEnvironment = RANDOM_PORT)
-@ActiveProfiles("test-h2")
-class DeliveryIntegrationTest {
+abstract class DeliveryIntegrationTest {
 
     companion object {
         const val CREATE_URL = "/delivery"
@@ -48,7 +43,7 @@ class DeliveryIntegrationTest {
     }
 
     @Test
-    fun `test creation`() {
+    fun `Create an order, check if it's present in ongoing orders`() {
         val headers = HttpHeaders().apply {
             add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
         }

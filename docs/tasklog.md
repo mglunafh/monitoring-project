@@ -3,15 +3,15 @@
 ### Current
 
 - `IPMN-2` -- implement 'Deliveries' service
-  - `IPMN-5` add integration tests
-    - create different profiles for H2 / MariaDB / PostgreSQL
 - `IPMN-10` -- Monitoring
   - `IPMN-11` -- add monitoring to 'Deliveries'
+- `IPMN-13` -- add docker compose file, configure bootBuildImage 
 
 ---------
 
 ### Done
 
+- `IPMN-5` -- add integration tests with H2 / MariaDB / PostgreSQL using Testcontainers
 - `IPMN-12` -- fix response model, introduce 'payload' field (kinda blocks integration testing)
 - `IPMN-6` -- Customize LocalDateTime serialization format for Spring Boot ObjectMapper
 - `IPMN-9` -- implement `stats` endpoint

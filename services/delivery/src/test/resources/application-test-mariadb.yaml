@@ -1,0 +1,9 @@
+spring:
+  jpa:
+    generate-ddl: true
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto:
+        sql: create-drop
+    init:
+      mode: always
