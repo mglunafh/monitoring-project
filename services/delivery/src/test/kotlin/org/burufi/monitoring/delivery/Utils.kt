@@ -6,10 +6,12 @@ import org.burufi.monitoring.delivery.model.DeliveryOrder
 import org.burufi.monitoring.delivery.model.TransportCategory.QUADCOPTER
 import org.burufi.monitoring.delivery.model.TransportCategory.TRUCK
 import org.burufi.monitoring.delivery.model.TransportType
+import org.springframework.core.ParameterizedTypeReference
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
 const val TEST_MARK = "Test Mark"
+const val TEST_KIA_RIO = "Kia Rio 2017"
 const val GAZELLE_MARK = "Test Gazelle"
 const val GEORADAR_MARK = "Test GeoRadar"
 val ORDER_TIME: LocalDateTime = LocalDateTime.of(2020, 1, 1, 10, 30, 0)
@@ -61,3 +63,5 @@ val TEST_CREATE_ORDER_REQUEST = """
         """.trimIndent()
 
 val TEST_DELIVERY_ORDER_DTO = OrderMapper.map(TEST_ORDER.copy(id = 1349))
+
+inline fun <reified T: Any> typeRef(): ParameterizedTypeReference<T> = object : ParameterizedTypeReference<T>() {}

@@ -4,7 +4,6 @@
 
 - `IPMN-2` -- implement 'Deliveries' service
   - `IPMN-5` add integration tests
-    - write down use cases 
     - create different profiles for H2 / MariaDB / PostgreSQL
 - `IPMN-10` -- Monitoring
   - `IPMN-11` -- add monitoring to 'Deliveries'
