@@ -1,0 +1,11 @@
+server:
+  port: 8080
+  shutdown: graceful
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/db_delivery
+    username: db-user
+    password: db-pwd
+    hikari:
+      schema: delivery          # this is actually necessary to make default schema work

@@ -21,9 +21,9 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_PROFILES_ACTIVE: some
       SPRING_DATASOURCE_URL: jdbc:postgresql://db-delivery:5432/db_delivery
       SPRING_DATASOURCE_USERNAME: db-user
       SPRING_DATASOURCE_PASSWORD: db-pwd
+      SPRING_DATASOURCE_HIKARI_SCHEMA: delivery       # <-- this is actually helpful to make default schema work
     depends_on:
       - db-delivery

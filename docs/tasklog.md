@@ -4,14 +4,16 @@
 
 - `IPMN-2` -- implement 'Deliveries' service
 - `IPMN-10` -- Monitoring
-  - `IPMN-11` -- add monitoring to 'Deliveries'
-- `IPMN-15` -- create 'docker' Spring profile 
+  - `IPMN-11` -- add metrics to 'Deliveries'
+  - `IPMN-17` -- add logging to 'Deliveries'
+  - `IPMN-18` -- add tracing to 'Deliveries'
 - `IPMN-16` -- BUG '/delivery/stats' somehow always shows 'SENT' status
 
 ---------
 
 ### Done
 
+- `IPMN-15` -- create 'docker' Spring profile
 - `IPMN-13` -- add docker compose file, configure bootBuildImage
 - `IPMN-14` -- create a new Spring `local` profile to run delivery service with in-memory H2
 - `IPMN-5` -- add integration tests with H2 / MariaDB / PostgreSQL using Testcontainers
