@@ -2,6 +2,7 @@ spring:
   jpa:
     generate-ddl: true
     defer-datasource-initialization: true
+    show-sql: true
     hibernate:
       ddl-auto:
         sql: create-drop

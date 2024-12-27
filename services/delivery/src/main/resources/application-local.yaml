@@ -1,0 +1,13 @@
+server:
+  port: 8080
+  shutdown: graceful
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:test
+    username: sa
+    password: sa
+  h2:
+    console:
+      enabled: true
+      path: /h2

@@ -2,8 +2,15 @@ spring:
   jpa:
     generate-ddl: true
     defer-datasource-initialization: true
+    show-sql: true
     hibernate:
       ddl-auto:
         sql: create-drop
     init:
       mode: always
+    properties:
+      jakarta:
+        persistence:
+          create-database-schemas: true
+      hibernate:
+        default_schema: delivery

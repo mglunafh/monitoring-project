@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component
 import java.math.BigDecimal
 
 @Component
-@Profile("default")
+@Profile("local")
 class TransportPopulator(
     val transportTypeRepository: TransportTypeRepository,
     val parkRepository: TransportRepository

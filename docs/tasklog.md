@@ -11,6 +11,7 @@
 
 ### Done
 
+- `IPMN-14` -- create a new Spring `local` profile to run delivery service with in-memory H2
 - `IPMN-5` -- add integration tests with H2 / MariaDB / PostgreSQL using Testcontainers
 - `IPMN-12` -- fix response model, introduce 'payload' field (kinda blocks integration testing)
 - `IPMN-6` -- Customize LocalDateTime serialization format for Spring Boot ObjectMapper

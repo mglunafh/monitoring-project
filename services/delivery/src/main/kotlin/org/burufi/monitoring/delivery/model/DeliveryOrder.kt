@@ -16,14 +16,11 @@ import java.time.LocalDateTime
  * @property distance Distance from the delivery to the destination point.
  * @property transportType Transport type which was selected for the order, points to the [TransportType].
  * @property orderTime Time when the delivery order was registered.
- * @property status Order status of type [OrderStatus]
+ * @property status Order status of type [OrderStatus].
  * @property transport Transport unit assigned to this delivery order, points to the [Transport].
  * @property departureTime Departure time of the transport unit with the order.
  * @property arrivalTime Arrival time of the order.
  *
- * @see TransportType
- * @see Transport
- * @see OrderStatus
  */
 @Entity
 data class DeliveryOrder(

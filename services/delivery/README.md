@@ -7,3 +7,6 @@
 - `POST /delivery` creates an order;
 - `GET /delivery/ongoing` shows a list of ongoing orders;
 - `GET /delivery/stats` shows some aggregate statistics for all order types. 
+
+Доступные Spring-профили:
+- `local`. Предназначен для локальной разработки и запуска, использует in-memory H2.

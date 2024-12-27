@@ -11,7 +11,7 @@ import org.testcontainers.containers.PostgreSQLContainer
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @ActiveProfiles("test-postgresql")
-@Sql(scripts = ["classpath:data.sql"])
+@Sql(scripts = ["classpath:data-delivery.sql"])
 class PostgresIntegrationTest : DeliveryIntegrationTest() {
 
     companion object {
