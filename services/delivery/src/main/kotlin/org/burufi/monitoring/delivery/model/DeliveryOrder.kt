@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.SequenceGenerator
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
@@ -24,7 +25,9 @@ import java.time.LocalDateTime
  */
 @Entity
 data class DeliveryOrder(
-    @Id @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "orderGenerator")
+    @SequenceGenerator(name = "orderGenerator", sequenceName = "delivery_order_seq", allocationSize = 3)
     var id: Int? = null,
 
     @Column(unique = true)

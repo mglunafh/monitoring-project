@@ -26,3 +26,14 @@ dependencies {
     testImplementation("org.testcontainers:postgresql")
     testImplementation("org.assertj:assertj-core")
 }
+
+tasks.bootBuildImage {
+    imageName = "monitoring-${project.name}:$version"
+
+    environment = mapOf(
+        "BP_JVM_VERSION" to "21",
+        "BP_JVM_CDS_ENABLED" to "false",
+        "BP_SPRING_CLOUD_BINDINGS_DISABLED" to "true",
+        "BPL_SPRING_CLOUD_BINDINGS_DISABLED" to "true"
+    )
+}

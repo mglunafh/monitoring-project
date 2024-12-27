@@ -5,6 +5,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import jakarta.persistence.SequenceGenerator
 import java.math.BigDecimal
 
 /**
@@ -21,7 +22,9 @@ import java.math.BigDecimal
  */
 @Entity
 data class TransportType(
-    @Id @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "transportTypeGenerator")
+    @SequenceGenerator(name = "transportTypeGenerator", sequenceName = "transport_type_seq", allocationSize = 7)
     var id: Int? = null,
 
     var category: TransportCategory,

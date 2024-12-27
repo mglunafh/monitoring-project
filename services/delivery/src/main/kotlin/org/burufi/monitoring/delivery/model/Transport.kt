@@ -6,6 +6,7 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 
 /**
@@ -20,7 +21,9 @@ import jakarta.persistence.Table
 @Entity
 @Table(name = "park")
 data class Transport(
-    @Id @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "parkGenerator")
+    @SequenceGenerator(name = "parkGenerator", sequenceName = "park_seq", allocationSize = 5)
     var id: Int? = null,
 
     @ManyToOne

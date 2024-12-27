@@ -1,0 +1,29 @@
+name: monitoring-project
+
+services:
+  db-delivery:
+    image: postgres:16
+    container_name: db-delivery
+    environment:
+      POSTGRES_DB: db_delivery
+      POSTGRES_USER: db-user
+      POSTGRES_PASSWORD: db-pwd
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db-delivery-init:/docker-entrypoint-initdb.d
+
+  delivery:
+    image: monitoring-delivery:0.1
+    container_name: srv-delivery
+    cpus: 1.5
+    mem_limit: 750m
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: some
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-delivery:5432/db_delivery
+      SPRING_DATASOURCE_USERNAME: db-user
+      SPRING_DATASOURCE_PASSWORD: db-pwd
+    depends_on:
+      - db-delivery
