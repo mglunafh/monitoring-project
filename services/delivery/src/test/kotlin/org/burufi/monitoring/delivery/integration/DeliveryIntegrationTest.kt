@@ -6,7 +6,10 @@ import org.burufi.monitoring.delivery.TEST_SHOPPING_CART
 import org.burufi.monitoring.delivery.dto.CreatedDeliveryOrder
 import org.burufi.monitoring.delivery.dto.DeliveryResponse
 import org.burufi.monitoring.delivery.dto.ListOrderResponse
+import org.burufi.monitoring.delivery.dto.OrderStatisticsDto
+import org.burufi.monitoring.delivery.dto.OrderStatisticsResponse
 import org.burufi.monitoring.delivery.dto.ResponseCode
+import org.burufi.monitoring.delivery.model.OrderStatus
 import org.burufi.monitoring.delivery.repository.OrderRepository
 import org.burufi.monitoring.delivery.typeRef
 import org.junit.jupiter.api.BeforeEach
@@ -23,12 +26,14 @@ abstract class DeliveryIntegrationTest {
     companion object {
         const val CREATE_URL = "/delivery"
         const val ONGOING_ORDERS_URL = "/delivery/ongoing"
+        const val STATS_URL = "/delivery/stats"
 
         const val TEST_REQUEST =
             """{"shoppingCartId": "$TEST_SHOPPING_CART", "transportMark": "$TEST_KIA_RIO", "distance": 150 }"""
 
         val typeRefCreateOrder = typeRef<DeliveryResponse<CreatedDeliveryOrder>>()
         val typeRefOngoingOrders = typeRef<DeliveryResponse<ListOrderResponse>>()
+        val typeRefStats = typeRef<DeliveryResponse<OrderStatisticsResponse>>()
     }
 
     @Autowired
@@ -43,7 +48,7 @@ abstract class DeliveryIntegrationTest {
     }
 
     @Test
-    fun `Create an order, check if it's present in ongoing orders`() {
+    fun `Create an order, check if it's present in ongoing orders and shows up in statistics`() {
         val headers = HttpHeaders().apply {
             add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
         }
@@ -63,5 +68,12 @@ abstract class DeliveryIntegrationTest {
         val createdDeliveryOrder = requireNotNull(responseCreate.payload)
         assertThat(ongoingOrdersList[0]).extracting("id", "shoppingCartId", "distance", "transportMark", "orderTime")
             .isEqualTo(listOf(createdDeliveryOrder.orderId, TEST_SHOPPING_CART, 150, TEST_KIA_RIO, createdDeliveryOrder.orderTime))
+
+        val statsResult = restTemplate.exchange(STATS_URL, HttpMethod.GET, HttpEntity<Any>(null, null), typeRefStats)
+        val responseStats = requireNotNull(statsResult.body)
+
+        assertThat(responseStats).extracting("responseCode", "errorMessage").isEqualTo(listOf(ResponseCode.OK, null))
+        val stats = requireNotNull(responseStats.payload).statistics
+        assertThat(stats[0]).isEqualTo(OrderStatisticsDto(OrderStatus.REGISTERED, 1, null))
     }
 }

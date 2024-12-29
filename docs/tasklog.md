@@ -7,12 +7,12 @@
   - `IPMN-11` -- add metrics to 'Deliveries'
   - `IPMN-17` -- add logging to 'Deliveries'
   - `IPMN-18` -- add tracing to 'Deliveries'
-- `IPMN-16` -- BUG '/delivery/stats' somehow always shows 'SENT' status
 
 ---------
 
 ### Done
 
+- `IPMN-16` -- BUG '/delivery/stats' somehow always shows 'SENT' status
 - `IPMN-19` -- add 'shoppingCartId' to the create-delivery-response
 - `IPMN-15` -- create 'docker' Spring profile
 - `IPMN-13` -- add docker compose file, configure bootBuildImage

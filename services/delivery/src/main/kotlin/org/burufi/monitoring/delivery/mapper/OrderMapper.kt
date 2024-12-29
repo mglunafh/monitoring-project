@@ -4,7 +4,6 @@ import org.burufi.monitoring.delivery.dto.DeliveryOrderDto
 import org.burufi.monitoring.delivery.dto.OrderStatisticsDto
 import org.burufi.monitoring.delivery.model.DeliveryOrder
 import org.burufi.monitoring.delivery.model.OrderStatistics
-import org.burufi.monitoring.delivery.model.OrderStatus
 
 object OrderMapper {
 
@@ -20,7 +19,7 @@ object OrderMapper {
     )
 
     fun map(orderStatistics: OrderStatistics) = OrderStatisticsDto(
-        status = OrderStatus.SENT,
+        status = orderStatistics.status,
         orderCount = orderStatistics.orderCount,
         totalCost = orderStatistics.totalCost,
     )
