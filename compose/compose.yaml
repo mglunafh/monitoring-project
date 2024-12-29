@@ -14,7 +14,7 @@ services:
       - ./db-delivery-init:/docker-entrypoint-initdb.d
 
   delivery:
-    image: monitoring-delivery:0.1
+    image: monitoring-delivery:0.2
     container_name: srv-delivery
     cpus: 1.5
     mem_limit: 750m

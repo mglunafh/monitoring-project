@@ -7,7 +7,7 @@ plugins {
 
 subprojects {
     group = "org.burufi.monitoring"
-    version = "0.1"
+    version = "0.2"
 
     apply(plugin = "org.jetbrains.kotlin.jvm")
 
