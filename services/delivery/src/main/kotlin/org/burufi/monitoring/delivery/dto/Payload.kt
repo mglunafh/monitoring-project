@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 
 sealed class Payload
 
-data class CreatedDeliveryOrder(val orderId: Int, val orderTime: LocalDateTime) : Payload()
+data class CreatedDeliveryOrder(val shoppingCartId: String, val orderId: Int, val orderTime: LocalDateTime) : Payload()
 
 data class ListOrderResponse(val orders: List<DeliveryOrderDto>) : Payload()
 

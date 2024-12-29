@@ -13,6 +13,7 @@
 
 ### Done
 
+- `IPMN-19` -- add 'shoppingCartId' to the create-delivery-response
 - `IPMN-15` -- create 'docker' Spring profile
 - `IPMN-13` -- add docker compose file, configure bootBuildImage
 - `IPMN-14` -- create a new Spring `local` profile to run delivery service with in-memory H2

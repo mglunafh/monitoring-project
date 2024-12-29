@@ -32,7 +32,7 @@ class DeliveryController(
             return ResponseEntity.badRequest().body(DeliveryResponse.error(ResponseCode.VALIDATION_FAILURE, message))
         }
         val createdOrder = orderService.create(orderDto)
-        val response = CreatedDeliveryOrder(createdOrder.id!!, createdOrder.orderTime).toResponse()
+        val response = CreatedDeliveryOrder(orderDto.shoppingCartId, createdOrder.id!!, createdOrder.orderTime).toResponse()
         return ResponseEntity.ok(response)
     }
 

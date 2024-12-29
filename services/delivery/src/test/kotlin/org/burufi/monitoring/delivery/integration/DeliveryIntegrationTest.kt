@@ -50,8 +50,8 @@ abstract class DeliveryIntegrationTest {
         val createResult = restTemplate.exchange(CREATE_URL, HttpMethod.POST, HttpEntity(TEST_REQUEST, headers), typeRefCreateOrder)
         val responseCreate = requireNotNull(createResult.body)
 
-        assertThat(responseCreate).extracting("responseCode", "errorMessage", "payload.orderId")
-            .isEqualTo(listOf(ResponseCode.OK, null, 1))
+        assertThat(responseCreate).extracting("responseCode", "errorMessage", "payload.shoppingCartId", "payload.orderId")
+            .isEqualTo(listOf(ResponseCode.OK, null, TEST_SHOPPING_CART, 1))
 
         val ongoingOrdersResult = restTemplate.exchange(ONGOING_ORDERS_URL, HttpMethod.GET, HttpEntity<Any>(null, null) , typeRefOngoingOrders)
         val responseOrders = requireNotNull(ongoingOrdersResult.body)
