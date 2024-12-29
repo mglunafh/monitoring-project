@@ -2,7 +2,6 @@
 
 ### Current
 
-- `IPMN-2` -- implement 'Deliveries' service
 - `IPMN-10` -- Monitoring
   - `IPMN-11` -- add metrics to 'Deliveries'
   - `IPMN-17` -- add logging to 'Deliveries'
@@ -12,6 +11,7 @@
 
 ### Done
 
+- `IPMN-2` -- implement 'Deliveries' service
 - `IPMN-16` -- BUG '/delivery/stats' somehow always shows 'SENT' status
 - `IPMN-19` -- add 'shoppingCartId' to the create-delivery-response
 - `IPMN-15` -- create 'docker' Spring profile
