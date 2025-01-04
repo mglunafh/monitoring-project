@@ -8,6 +8,16 @@ spring:
     username:
     password:
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
 ### for initializing initial database structure
 #  jpa:
 #    generate-ddl: true

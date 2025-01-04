@@ -3,7 +3,6 @@
 ### Current
 
 - `IPMN-10` -- Monitoring
-  - `IPMN-11` -- add metrics to 'Deliveries'
   - `IPMN-17` -- add logging to 'Deliveries'
   - `IPMN-18` -- add tracing to 'Deliveries'
 
@@ -11,6 +10,7 @@
 
 ### Done
 
+- `IPMN-11` -- added Prometheus, Grafana to docker-compose, added 
 - `IPMN-2` -- implement 'Deliveries' service
 - `IPMN-16` -- BUG '/delivery/stats' somehow always shows 'SENT' status
 - `IPMN-19` -- add 'shoppingCartId' to the create-delivery-response
