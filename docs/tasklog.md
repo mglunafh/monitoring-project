@@ -6,6 +6,8 @@
   - `IPMN-11` -- add metrics to 'Deliveries'
   - `IPMN-17` -- add logging to 'Deliveries'
   - `IPMN-18` -- add tracing to 'Deliveries'
+  - `IPMN-21` -- deploy grafana with dashboards (https://stackoverflow.com/questions/63518460/grafana-import-dashboard-as-part-of-docker-compose)
+- `IPMN-20` -- implement 'Warehouse' app
 
 ---------
 

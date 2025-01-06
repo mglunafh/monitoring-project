@@ -6,9 +6,6 @@ plugins {
 }
 
 dependencies {
-    implementation(platform("org.springframework.boot:spring-boot-dependencies:3.4.0"))
-    implementation(platform("org.testcontainers:testcontainers-bom:1.20.4"))
-
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
@@ -25,15 +22,4 @@ dependencies {
     testImplementation("org.testcontainers:mariadb")
     testImplementation("org.testcontainers:postgresql")
     testImplementation("org.assertj:assertj-core")
-}
-
-tasks.bootBuildImage {
-    imageName = "monitoring-${project.name}:$version"
-
-    environment = mapOf(
-        "BP_JVM_VERSION" to "21",
-        "BP_JVM_CDS_ENABLED" to "false",
-        "BP_SPRING_CLOUD_BINDINGS_DISABLED" to "true",
-        "BPL_SPRING_CLOUD_BINDINGS_DISABLED" to "true"
-    )
 }

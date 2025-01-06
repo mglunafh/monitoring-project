@@ -10,3 +10,4 @@ pluginManagement {
 rootProject.name = "monitoring-services"
 include("delivery")
 include("shop")
+include("warehouse")

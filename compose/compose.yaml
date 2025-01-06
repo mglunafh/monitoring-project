@@ -1,6 +1,18 @@
 name: monitoring-project
 
 services:
+  db-warehouse:
+    image: postgres:16
+    container_name: db-warehouse
+    environment:
+      POSTGRES_DB: db_warehouse
+      POSTGRES_USER: db-user
+      POSTGRES_PASSWORD: db-pwd
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./db-warehouse-init:/docker-entrypoint-initdb.d
+
   db-delivery:
     image: postgres:16
     container_name: db-delivery
