@@ -8,11 +8,14 @@
   - `IPMN-18` -- add tracing to 'Deliveries'
   - `IPMN-21` -- deploy grafana with dashboards (https://stackoverflow.com/questions/63518460/grafana-import-dashboard-as-part-of-docker-compose)
 - `IPMN-20` -- implement 'Warehouse' app
+  - `IPMN-22` -- add JDBC-layer tests 
+  - `IPMN-23` -- introduce 'Contract' entity, add 'Add contract' endpoint
 
 ---------
 
 ### Done
 
+- `IPMN-21` -- add JDBC-based DAO layer
 - `IPMN-2` -- implement 'Deliveries' service
 - `IPMN-16` -- BUG '/delivery/stats' somehow always shows 'SENT' status
 - `IPMN-19` -- add 'shoppingCartId' to the create-delivery-response
