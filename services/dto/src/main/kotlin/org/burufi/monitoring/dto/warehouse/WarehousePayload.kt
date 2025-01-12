@@ -8,4 +8,4 @@ data class ListSuppliers(val suppliers: List<SupplierDto>) : WarehousePayload
 
 data class ListGoods(val goods: List<GoodsItemDto>) : WarehousePayload
 
-data class RegisteredContract(val some: Any) : WarehousePayload
+data class RegisteredContract(val id: Int) : WarehousePayload
