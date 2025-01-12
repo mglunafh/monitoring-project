@@ -1,4 +1,4 @@
-package org.burufi.monitoring.delivery.dto
+package org.burufi.monitoring.dto.delivery
 
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Positive

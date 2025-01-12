@@ -1,4 +1,4 @@
-package org.burufi.monitoring.delivery.dto
+package org.burufi.monitoring.dto
 
 enum class ResponseCode {
     OK,

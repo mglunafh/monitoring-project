@@ -1,9 +1,9 @@
 package org.burufi.monitoring.delivery.mapper
 
-import org.burufi.monitoring.delivery.dto.DeliveryOrderDto
-import org.burufi.monitoring.delivery.dto.OrderStatisticsDto
 import org.burufi.monitoring.delivery.model.DeliveryOrder
 import org.burufi.monitoring.delivery.model.OrderStatistics
+import org.burufi.monitoring.dto.delivery.DeliveryOrderDto
+import org.burufi.monitoring.dto.delivery.OrderStatisticsDto
 
 object OrderMapper {
 
@@ -13,13 +13,13 @@ object OrderMapper {
         distance = order.distance,
         transportMark = order.transportType.mark,
         orderTime = order.orderTime,
-        status = order.status,
+        status = order.status.name,
         departureTime = order.departureTime,
         arrivalTime = order.arrivalTime
     )
 
     fun map(orderStatistics: OrderStatistics) = OrderStatisticsDto(
-        status = orderStatistics.status,
+        status = orderStatistics.status.name,
         orderCount = orderStatistics.orderCount,
         totalCost = orderStatistics.totalCost,
     )

@@ -1,15 +1,15 @@
 package org.burufi.monitoring.delivery.controller
 
 import jakarta.validation.Valid
-import org.burufi.monitoring.delivery.dto.CreateDeliveryOrderDto
-import org.burufi.monitoring.delivery.dto.CreatedDeliveryOrder
-import org.burufi.monitoring.delivery.dto.DeliveryResponse
-import org.burufi.monitoring.delivery.dto.DeliveryResponse.Companion.toResponse
-import org.burufi.monitoring.delivery.dto.ListOrderResponse
-import org.burufi.monitoring.delivery.dto.OrderStatisticsResponse
-import org.burufi.monitoring.delivery.dto.ResponseCode
 import org.burufi.monitoring.delivery.mapper.OrderMapper
 import org.burufi.monitoring.delivery.service.DeliveryOrderService
+import org.burufi.monitoring.dto.MyResponse
+import org.burufi.monitoring.dto.MyResponse.Companion.toResponse
+import org.burufi.monitoring.dto.ResponseCode
+import org.burufi.monitoring.dto.delivery.CreateDeliveryOrderDto
+import org.burufi.monitoring.dto.delivery.CreatedDeliveryOrder
+import org.burufi.monitoring.dto.delivery.ListOrders
+import org.burufi.monitoring.dto.delivery.OrderStatistics
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.Errors
@@ -26,10 +26,10 @@ class DeliveryController(
 ) {
 
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun createDeliveryOrder(@Valid @RequestBody orderDto: CreateDeliveryOrderDto, errors: Errors): ResponseEntity<DeliveryResponse<CreatedDeliveryOrder>> {
+    fun createDeliveryOrder(@Valid @RequestBody orderDto: CreateDeliveryOrderDto, errors: Errors): ResponseEntity<MyResponse<CreatedDeliveryOrder>> {
         if (errors.hasErrors()) {
             val message = errors.allErrors.joinToString(separator = ". ") { it.defaultMessage ?: "" }
-            return ResponseEntity.badRequest().body(DeliveryResponse.error(ResponseCode.VALIDATION_FAILURE, message))
+            return ResponseEntity.badRequest().body(MyResponse.error(ResponseCode.VALIDATION_FAILURE, message))
         }
         val createdOrder = orderService.create(orderDto)
         val response = CreatedDeliveryOrder(orderDto.shoppingCartId, createdOrder.id!!, createdOrder.orderTime).toResponse()
@@ -37,15 +37,15 @@ class DeliveryController(
     }
 
     @GetMapping("/ongoing", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun showOngoingOrders(): ResponseEntity<DeliveryResponse<ListOrderResponse>> {
+    fun showOngoingOrders(): ResponseEntity<MyResponse<ListOrders>> {
         val ongoingOrders = orderService.getOngoing()
-        return ResponseEntity.ok(ListOrderResponse(ongoingOrders).toResponse())
+        return ResponseEntity.ok(ListOrders(ongoingOrders).toResponse())
     }
 
     @GetMapping("/stats", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun showStatistics(): ResponseEntity<DeliveryResponse<OrderStatisticsResponse>> {
+    fun showStatistics(): ResponseEntity<MyResponse<OrderStatistics>> {
         val statistics = orderService.getStatistics()
         val statisticsDto = statistics.map { OrderMapper.map(it) }
-        return ResponseEntity.ok(OrderStatisticsResponse(statisticsDto).toResponse())
+        return ResponseEntity.ok(OrderStatistics(statisticsDto).toResponse())
     }
 }

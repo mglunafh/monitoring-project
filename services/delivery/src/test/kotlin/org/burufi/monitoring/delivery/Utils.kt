@@ -1,11 +1,11 @@
 package org.burufi.monitoring.delivery
 
-import org.burufi.monitoring.delivery.dto.CreateDeliveryOrderDto
 import org.burufi.monitoring.delivery.mapper.OrderMapper
 import org.burufi.monitoring.delivery.model.DeliveryOrder
 import org.burufi.monitoring.delivery.model.TransportCategory.QUADCOPTER
 import org.burufi.monitoring.delivery.model.TransportCategory.TRUCK
 import org.burufi.monitoring.delivery.model.TransportType
+import org.burufi.monitoring.dto.delivery.CreateDeliveryOrderDto
 import org.springframework.core.ParameterizedTypeReference
 import java.math.BigDecimal
 import java.time.LocalDateTime

@@ -3,15 +3,15 @@ package org.burufi.monitoring.delivery.integration
 import org.assertj.core.api.Assertions.assertThat
 import org.burufi.monitoring.delivery.TEST_KIA_RIO
 import org.burufi.monitoring.delivery.TEST_SHOPPING_CART
-import org.burufi.monitoring.delivery.dto.CreatedDeliveryOrder
-import org.burufi.monitoring.delivery.dto.DeliveryResponse
-import org.burufi.monitoring.delivery.dto.ListOrderResponse
-import org.burufi.monitoring.delivery.dto.OrderStatisticsDto
-import org.burufi.monitoring.delivery.dto.OrderStatisticsResponse
-import org.burufi.monitoring.delivery.dto.ResponseCode
 import org.burufi.monitoring.delivery.model.OrderStatus
 import org.burufi.monitoring.delivery.repository.OrderRepository
 import org.burufi.monitoring.delivery.typeRef
+import org.burufi.monitoring.dto.MyResponse
+import org.burufi.monitoring.dto.ResponseCode
+import org.burufi.monitoring.dto.delivery.CreatedDeliveryOrder
+import org.burufi.monitoring.dto.delivery.ListOrders
+import org.burufi.monitoring.dto.delivery.OrderStatisticsDto
+import org.burufi.monitoring.dto.delivery.OrderStatistics
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.client.TestRestTemplate
@@ -31,9 +31,9 @@ abstract class DeliveryIntegrationTest {
         const val TEST_REQUEST =
             """{"shoppingCartId": "$TEST_SHOPPING_CART", "transportMark": "$TEST_KIA_RIO", "distance": 150 }"""
 
-        val typeRefCreateOrder = typeRef<DeliveryResponse<CreatedDeliveryOrder>>()
-        val typeRefOngoingOrders = typeRef<DeliveryResponse<ListOrderResponse>>()
-        val typeRefStats = typeRef<DeliveryResponse<OrderStatisticsResponse>>()
+        val typeRefCreateOrder = typeRef<MyResponse<CreatedDeliveryOrder>>()
+        val typeRefOngoingOrders = typeRef<MyResponse<ListOrders>>()
+        val typeRefStats = typeRef<MyResponse<OrderStatistics>>()
     }
 
     @Autowired
@@ -74,6 +74,6 @@ abstract class DeliveryIntegrationTest {
 
         assertThat(responseStats).extracting("responseCode", "errorMessage").isEqualTo(listOf(ResponseCode.OK, null))
         val stats = requireNotNull(responseStats.payload).statistics
-        assertThat(stats[0]).isEqualTo(OrderStatisticsDto(OrderStatus.REGISTERED, 1, null))
+        assertThat(stats[0]).isEqualTo(OrderStatisticsDto(OrderStatus.REGISTERED.name, 1, null))
     }
 }
