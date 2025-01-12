@@ -11,7 +11,7 @@ import org.burufi.monitoring.delivery.model.TransportStatus
 import org.burufi.monitoring.delivery.repository.OrderRepository
 import org.burufi.monitoring.delivery.repository.TransportRepository
 import org.burufi.monitoring.delivery.repository.TransportTypeRepository
-import org.burufi.monitoring.dto.delivery.CreateDeliveryOrderDto
+import org.burufi.monitoring.dto.delivery.CreateDeliveryOrderRequest
 import org.burufi.monitoring.dto.delivery.DeliveryOrderDto
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -25,7 +25,7 @@ class DeliveryOrderService(
 ) {
 
     @Transactional(rollbackOn = [DeliveryException::class])
-    fun create(createOrder: CreateDeliveryOrderDto): DeliveryOrder {
+    fun create(createOrder: CreateDeliveryOrderRequest): DeliveryOrder {
         val mark = createOrder.transportMark
         val transportType = transportTypeRepo.findByMark(mark)
         if (transportType == null) throw DeliveryException(FailureType.TRANSPORT_MARK_NOT_FOUND)

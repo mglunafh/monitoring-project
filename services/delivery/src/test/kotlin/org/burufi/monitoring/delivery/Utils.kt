@@ -5,7 +5,7 @@ import org.burufi.monitoring.delivery.model.DeliveryOrder
 import org.burufi.monitoring.delivery.model.TransportCategory.QUADCOPTER
 import org.burufi.monitoring.delivery.model.TransportCategory.TRUCK
 import org.burufi.monitoring.delivery.model.TransportType
-import org.burufi.monitoring.dto.delivery.CreateDeliveryOrderDto
+import org.burufi.monitoring.dto.delivery.CreateDeliveryOrderRequest
 import org.springframework.core.ParameterizedTypeReference
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -52,7 +52,7 @@ val TEST_ORDER = DeliveryOrder(
     orderTime = ORDER_TIME
 )
 
-val TEST_CREATE_ORDER_DTO = CreateDeliveryOrderDto(
+val TEST_CREATE_ORDER_DTO = CreateDeliveryOrderRequest(
     shoppingCartId = TEST_SHOPPING_CART,
     transportMark = GAZELLE_MARK,
     distance = 150

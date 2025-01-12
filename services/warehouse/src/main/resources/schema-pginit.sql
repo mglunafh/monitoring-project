@@ -17,15 +17,16 @@ CREATE TABLE IF NOT EXISTS warehouse.goods (
 CREATE TABLE IF NOT EXISTS warehouse.supply_contracts (
     id serial PRIMARY KEY,
     supplier_id smallint REFERENCES warehouse.suppliers(id),
-    sign_date timestamp(6) without time zone NOT NULL,
-    price numeric(15,2) NOT NULL CHECK (price > 0)
+    sign_date timestamp(6) without time zone NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS warehouse.goods_in_contract (
-    id bigserial PRIMARY KEY,
     contract_id integer REFERENCES warehouse.supply_contracts(id),
     item_id smallint REFERENCES warehouse.goods(id),
-    amount integer NOT NULL CHECK (amount > 0)
+    amount integer NOT NULL CHECK (amount > 0),
+    price numeric(15,2) NOT NULL CHECK (price > 0),
+
+    PRIMARY KEY(contract_id, item_id)
 );
 
 CREATE TABLE IF NOT EXISTS warehouse.goods_reserve (

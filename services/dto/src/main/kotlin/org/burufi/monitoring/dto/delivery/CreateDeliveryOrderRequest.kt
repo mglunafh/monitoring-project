@@ -3,7 +3,7 @@ package org.burufi.monitoring.dto.delivery
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Positive
 
-data class CreateDeliveryOrderDto(
+data class CreateDeliveryOrderRequest(
     @field:NotBlank("Shopping Cart ID must not be blank")
     val shoppingCartId: String,
     @field:NotBlank("Transport mark must not be blank")

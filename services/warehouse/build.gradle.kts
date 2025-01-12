@@ -5,6 +5,7 @@ plugins {
 }
 
 dependencies {
+    implementation(project(":dto"))
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
     implementation("org.springframework.boot:spring-boot-starter-actuator")

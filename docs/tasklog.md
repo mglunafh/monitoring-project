@@ -11,13 +11,13 @@
   - `IPMN-22` -- add JDBC-layer tests 
   - `IPMN-23` -- introduce 'Contract' entity, add 'Add contract' endpoint
   - `IPMN-24` -- add 'docker' Spring profile
-- `IPMN-25` -- extract DTOs into a common subproject
 - `IPMN-26` -- think about extracting exceptions into a separate module 
 
 ---------
 
 ### Done
 
+- `IPMN-25` -- extract DTOs into a common subproject
 - `IPMN-21` -- add JDBC-based DAO layer
 - `IPMN-2` -- implement 'Deliveries' service
 - `IPMN-16` -- BUG '/delivery/stats' somehow always shows 'SENT' status

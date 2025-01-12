@@ -6,7 +6,7 @@ import org.burufi.monitoring.delivery.service.DeliveryOrderService
 import org.burufi.monitoring.dto.MyResponse
 import org.burufi.monitoring.dto.MyResponse.Companion.toResponse
 import org.burufi.monitoring.dto.ResponseCode
-import org.burufi.monitoring.dto.delivery.CreateDeliveryOrderDto
+import org.burufi.monitoring.dto.delivery.CreateDeliveryOrderRequest
 import org.burufi.monitoring.dto.delivery.CreatedDeliveryOrder
 import org.burufi.monitoring.dto.delivery.ListOrders
 import org.burufi.monitoring.dto.delivery.OrderStatistics
@@ -26,7 +26,7 @@ class DeliveryController(
 ) {
 
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun createDeliveryOrder(@Valid @RequestBody orderDto: CreateDeliveryOrderDto, errors: Errors): ResponseEntity<MyResponse<CreatedDeliveryOrder>> {
+    fun createDeliveryOrder(@Valid @RequestBody orderDto: CreateDeliveryOrderRequest, errors: Errors): ResponseEntity<MyResponse<CreatedDeliveryOrder>> {
         if (errors.hasErrors()) {
             val message = errors.allErrors.joinToString(separator = ". ") { it.defaultMessage ?: "" }
             return ResponseEntity.badRequest().body(MyResponse.error(ResponseCode.VALIDATION_FAILURE, message))
