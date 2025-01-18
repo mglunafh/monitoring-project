@@ -3,7 +3,8 @@ package org.burufi.monitoring.warehouse.controller
 import jakarta.validation.Valid
 import org.burufi.monitoring.dto.MyResponse
 import org.burufi.monitoring.dto.MyResponse.Companion.toResponse
-import org.burufi.monitoring.dto.ResponseCode
+import org.burufi.monitoring.dto.ResponseCode.VALIDATION_FAILURE
+import org.burufi.monitoring.dto.warehouse.ContractItemOrderDto
 import org.burufi.monitoring.dto.warehouse.ListGoods
 import org.burufi.monitoring.dto.warehouse.ListSuppliers
 import org.burufi.monitoring.dto.warehouse.RegisterContractRequest
@@ -43,15 +44,28 @@ class WarehouseController(private val service: WarehouseService) {
     ): ResponseEntity<MyResponse<RegisteredContract>> {
         if (errors.hasGlobalErrors()) {
             val message = errors.globalErrors.joinToString(separator = ". ") { it.defaultMessage ?: "" }
-            return ResponseEntity.badRequest().body(MyResponse.error(ResponseCode.VALIDATION_FAILURE, message))
+            return ResponseEntity.badRequest().body(MyResponse.error(VALIDATION_FAILURE, message))
         }
         if (errors.hasFieldErrors()) {
             val message = errors.fieldErrors.joinToString(separator = " ") {
                 "Field '${it.field}': ${it.defaultMessage}, got '${it.rejectedValue}' instead."
             }
-            return ResponseEntity.badRequest().body(MyResponse.error(ResponseCode.VALIDATION_FAILURE, message))
+            return ResponseEntity.badRequest().body(MyResponse.error(VALIDATION_FAILURE, message))
+        }
+        val duplicateIds = duplicateIds(contract.items)
+        if (duplicateIds.isNotEmpty()) {
+            val message = "Items in the contract must be unique, there were duplicate IDs: $duplicateIds"
+            return ResponseEntity.badRequest().body(MyResponse.error(VALIDATION_FAILURE, message))
         }
 
-        return ResponseEntity.ok(RegisteredContract(id = 138).toResponse())
+        val result = service.registerContract(contract)
+        return ResponseEntity.ok(result.toResponse())
+    }
+
+    private fun duplicateIds(items: List<ContractItemOrderDto>): Set<Int> {
+        val result = mutableSetOf<Int>()
+        val temp = mutableSetOf<Int>()
+        items.forEach { if (!temp.add(it.id)) result.add(it.id) }
+        return result
     }
 }

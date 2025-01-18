@@ -1,10 +1,12 @@
 package org.burufi.monitoring.warehouse.controller
 
 import org.burufi.monitoring.dto.warehouse.GoodsItemDto
+import org.burufi.monitoring.dto.warehouse.RegisteredContract
 import org.burufi.monitoring.dto.warehouse.SupplierDto
 import org.burufi.monitoring.warehouse.service.WarehouseService
 import org.hamcrest.core.StringContains
 import org.mockito.Mockito
+import org.mockito.kotlin.any
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.http.MediaType.APPLICATION_JSON
@@ -55,6 +57,21 @@ class WarehouseControllerTest {
 
     @Test
     fun `Test register contract`() {
+        val request = """
+            {"suppliedId": 100, "items": [
+                { "id": 6, "price": 10, "amount": 5 }
+            ]}
+        """.trimIndent()
+
+        Mockito.doReturn(RegisteredContract(id = 15)).`when`(warehouseService).registerContract(any())
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/warehouse/contract")
+            .content(request)
+            .contentType(APPLICATION_JSON)
+            .accept(APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.responseCode").value("OK"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.payload.id").value(15))
     }
 
     @Test

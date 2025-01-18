@@ -9,14 +9,15 @@
   - `IPMN-21` -- deploy grafana with dashboards (https://stackoverflow.com/questions/63518460/grafana-import-dashboard-as-part-of-docker-compose)
 - `IPMN-20` -- implement 'Warehouse' app
   - `IPMN-22` -- add JDBC-layer tests 
-  - `IPMN-23` -- introduce 'Contract' entity, add 'Add contract' endpoint
   - `IPMN-24` -- add 'docker' Spring profile
+  - `IPMN-27` -- contract info, total cost
 - `IPMN-26` -- think about extracting exceptions into a separate module 
 
 ---------
 
 ### Done
 
+- `IPMN-23` -- introduce 'Contract' entity, add 'Add contract' endpoint
 - `IPMN-25` -- extract DTOs into a common subproject
 - `IPMN-21` -- add JDBC-based DAO layer
 - `IPMN-2` -- implement 'Deliveries' service

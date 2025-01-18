@@ -15,7 +15,7 @@ class DeliveryExceptionHandler {
 
     companion object {
         const val INCORRECT_TRANSPORT_MARK = "Incorrect transport mark. Check if it's in the list of available transport types."
-        const val SHOPPING_CARD_ALREADY_REGISTERED = "Given shopping cart is already registered for delivery."
+        const val SHOPPING_CARD_ALREADY_REGISTERED = "Given shopping cart has already been already registered for delivery."
         const val UNEXPECTED_SERVER_ERROR = "Unexpected server error."
 
         private val log = LoggerFactory.getLogger(DeliveryExceptionHandler::class.java)

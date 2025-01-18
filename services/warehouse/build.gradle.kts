@@ -19,4 +19,5 @@ dependencies {
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:postgresql")
     testImplementation("org.assertj:assertj-core")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
 }

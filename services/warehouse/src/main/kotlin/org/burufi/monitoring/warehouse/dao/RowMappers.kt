@@ -9,6 +9,16 @@ import java.sql.ResultSet
 
 object RowMappers {
 
+    /**
+     * Extracts the integer value of 'count' column of a query result.
+     */
+    object SupplierExistsRowMapper : RowMapper<Int> {
+        override fun mapRow(rs: ResultSet, rowNum: Int) = rs.getInt("count")
+    }
+
+    /**
+     *  Extracts the supplier records from the query result.
+     */
     object SupplierRowMapper : RowMapper<Supplier> {
         override fun mapRow(rs: ResultSet, rowNum: Int): Supplier {
             val id = rs.getInt("id")
@@ -18,6 +28,9 @@ object RowMappers {
         }
     }
 
+    /**
+     * Extracts the items from the query result.
+     */
     object GoodsItemRowMapper : RowMapper<GoodsItem> {
         override fun mapRow(rs: ResultSet, rowNum: Int): GoodsItem {
             val id = rs.getInt("id")

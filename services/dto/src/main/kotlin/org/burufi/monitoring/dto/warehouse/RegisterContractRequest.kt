@@ -10,6 +10,6 @@ data class RegisterContractRequest(
     val items: List<ContractItemOrderDto>
 ) {
 
-    val totalPrice: BigDecimal
-        get() = items.sumOf { it.price }
+    val totalCost: BigDecimal
+        get() = items.sumOf { it.price * BigDecimal.valueOf(it.amount.toLong()) }
 }

@@ -1,9 +1,14 @@
 package org.burufi.monitoring.warehouse.dao
 
+import org.burufi.monitoring.dto.warehouse.ContractItemOrderDto
 import org.burufi.monitoring.warehouse.dao.record.GoodsItem
 import org.burufi.monitoring.warehouse.dao.record.Supplier
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
+import org.springframework.jdbc.support.GeneratedKeyHolder
 import org.springframework.stereotype.Component
+import java.math.BigDecimal
+import java.time.LocalDateTime
 
 @Component
 class WarehouseDao(private val jdbcTemplate: NamedParameterJdbcTemplate) {
@@ -14,5 +19,29 @@ class WarehouseDao(private val jdbcTemplate: NamedParameterJdbcTemplate) {
 
     fun getSuppliersList(): List<Supplier> {
         return jdbcTemplate.query("select * from suppliers", RowMappers.SupplierRowMapper)
+    }
+
+    fun supplierExists(id: Int): Boolean {
+        return jdbcTemplate.queryForObject(
+            "select count(1) as count from suppliers where id = :id",
+            mapOf("id" to id),
+            RowMappers.SupplierExistsRowMapper
+        ) == 1
+    }
+
+    fun createContract(supplierId: Int, signDate: LocalDateTime, cost: BigDecimal): Int {
+        val keyHolder = GeneratedKeyHolder()
+        jdbcTemplate.update(
+            "insert into supply_contracts(supplier_id, sign_date, total_cost) values(:id, :date, :cost)",
+            MapSqlParameterSource(mapOf("id" to supplierId, "date" to signDate,  "cost" to cost)),
+            keyHolder
+        )
+        return keyHolder.keys!!["id"] as Int        // <-- screams as a potential source of problems
+    }
+
+    fun registerContractItems(contractId: Int, items: List<ContractItemOrderDto>) {
+        val baseJdbcTemplate = jdbcTemplate.jdbcTemplate
+        baseJdbcTemplate.batchUpdate(ContractUpdater.INSERT_ITEM_QUERY, ContractUpdater(contractId, items))
+        baseJdbcTemplate.batchUpdate(StoreAmountUpdater.UPDATE_ITEM_AMOUNT_QUERY, StoreAmountUpdater(items))
     }
 }
