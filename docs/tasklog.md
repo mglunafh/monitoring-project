@@ -10,13 +10,13 @@
 - `IPMN-20` -- implement 'Warehouse' app
   - `IPMN-22` -- add JDBC-layer tests 
   - `IPMN-24` -- add 'docker' Spring profile
-  - `IPMN-27` -- contract info, total cost
 - `IPMN-26` -- think about extracting exceptions into a separate module 
 
 ---------
 
 ### Done
 
+- `IPMN-27` -- introduce 'Contract info' endpoint
 - `IPMN-23` -- introduce 'Contract' entity, add 'Add contract' endpoint
 - `IPMN-25` -- extract DTOs into a common subproject
 - `IPMN-21` -- add JDBC-based DAO layer

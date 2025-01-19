@@ -34,6 +34,7 @@ class WarehouseExceptionHandler {
         }
         return when (response.responseCode) {
             ResponseCode.OK -> ResponseEntity.ok(response)
+            ResponseCode.NOT_FOUND -> ResponseEntity.status(404).body(response)
             VALIDATION_FAILURE -> ResponseEntity.badRequest().body(response)
             INTERNAL_SERVER_ERROR -> ResponseEntity.internalServerError().body(response)
         }

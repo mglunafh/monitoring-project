@@ -3,17 +3,21 @@ package org.burufi.monitoring.warehouse.controller
 import jakarta.validation.Valid
 import org.burufi.monitoring.dto.MyResponse
 import org.burufi.monitoring.dto.MyResponse.Companion.toResponse
+import org.burufi.monitoring.dto.ResponseCode
 import org.burufi.monitoring.dto.ResponseCode.VALIDATION_FAILURE
+import org.burufi.monitoring.dto.warehouse.ContractInfo
 import org.burufi.monitoring.dto.warehouse.ContractItemOrderDto
 import org.burufi.monitoring.dto.warehouse.ListGoods
 import org.burufi.monitoring.dto.warehouse.ListSuppliers
 import org.burufi.monitoring.dto.warehouse.RegisterContractRequest
 import org.burufi.monitoring.dto.warehouse.RegisteredContract
 import org.burufi.monitoring.warehouse.service.WarehouseService
+import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -59,6 +63,16 @@ class WarehouseController(private val service: WarehouseService) {
         }
 
         val result = service.registerContract(contract)
+        return ResponseEntity.ok(result.toResponse())
+    }
+
+    @GetMapping("/contract/{id}")
+    fun getContractInfo(@PathVariable id: Int): ResponseEntity<MyResponse<ContractInfo>> {
+        val result = service.getContractInfo(id)
+        if (result == null) {
+            val body = MyResponse.error<ContractInfo>(ResponseCode.NOT_FOUND, "Contract with id '$id' is not found")
+            return ResponseEntity.status(HttpStatusCode.valueOf(404)).body(body)
+        }
         return ResponseEntity.ok(result.toResponse())
     }
 

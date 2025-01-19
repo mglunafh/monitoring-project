@@ -1,5 +1,6 @@
 package org.burufi.monitoring.warehouse.dao
 
+import org.burufi.monitoring.dto.warehouse.ContractInfo
 import org.burufi.monitoring.dto.warehouse.ContractItemOrderDto
 import org.burufi.monitoring.warehouse.dao.record.GoodsItem
 import org.burufi.monitoring.warehouse.dao.record.Supplier
@@ -43,5 +44,14 @@ class WarehouseDao(private val jdbcTemplate: NamedParameterJdbcTemplate) {
         val baseJdbcTemplate = jdbcTemplate.jdbcTemplate
         baseJdbcTemplate.batchUpdate(ContractUpdater.INSERT_ITEM_QUERY, ContractUpdater(contractId, items))
         baseJdbcTemplate.batchUpdate(StoreAmountUpdater.UPDATE_ITEM_AMOUNT_QUERY, StoreAmountUpdater(items))
+    }
+
+    fun getContractInfo(contractId: Int): ContractInfo? {
+        val result = jdbcTemplate.query(
+            RowMappers.ContractInfoMapper.CONTRACT_INFO_QUERY,
+            mapOf("id" to contractId),
+            RowMappers.ContractInfoMapper
+        )
+        return if (result.isNotEmpty()) result[0] else null
     }
 }

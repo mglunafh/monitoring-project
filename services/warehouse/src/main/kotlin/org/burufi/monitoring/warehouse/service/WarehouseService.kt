@@ -1,5 +1,6 @@
 package org.burufi.monitoring.warehouse.service
 
+import org.burufi.monitoring.dto.warehouse.ContractInfo
 import org.burufi.monitoring.dto.warehouse.GoodsItemDto
 import org.burufi.monitoring.dto.warehouse.RegisterContractRequest
 import org.burufi.monitoring.dto.warehouse.RegisteredContract
@@ -46,5 +47,10 @@ class WarehouseService(private val dao: WarehouseDao) {
         }
 
         return RegisteredContract(contractId, signDate, contractCost)
+    }
+
+    @Transactional
+    fun getContractInfo(contractId: Int): ContractInfo? {
+        return dao.getContractInfo(contractId)
     }
 }
