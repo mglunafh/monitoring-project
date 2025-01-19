@@ -25,6 +25,21 @@ services:
     volumes:
       - ./db-delivery-init:/docker-entrypoint-initdb.d
 
+  warehouse:
+    image: monitoring-warehouse:0.2
+    container_name: srv-warehouse
+    cpus: 1.5
+    mem_limit: 750m
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-warehouse:5432/db_warehouse
+      SPRING_DATASOURCE_USERNAME: db-user
+      SPRING_DATASOURCE_PASSWORD: db-pwd
+      SPRING_DATASOURCE_HIKARI_SCHEMA: warehouse    # <-- this is actually helpful to make default schema work
+    depends_on:
+      - db-warehouse
+
   delivery:
     image: monitoring-delivery:0.2
     container_name: srv-delivery
@@ -36,6 +51,6 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db-delivery:5432/db_delivery
       SPRING_DATASOURCE_USERNAME: db-user
       SPRING_DATASOURCE_PASSWORD: db-pwd
-      SPRING_DATASOURCE_HIKARI_SCHEMA: delivery       # <-- this is actually helpful to make default schema work
+      SPRING_DATASOURCE_HIKARI_SCHEMA: delivery
     depends_on:
       - db-delivery
