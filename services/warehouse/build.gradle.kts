@@ -4,6 +4,8 @@ plugins {
     id("org.springframework.boot")
 }
 
+val mockitoAgent = configurations.create("mockitoAgent")
+
 dependencies {
     implementation(project(":dto"))
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -20,4 +22,13 @@ dependencies {
     testImplementation("org.testcontainers:postgresql")
     testImplementation("org.assertj:assertj-core")
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
+
+    mockitoAgent("org.mockito:mockito-core:5.14.2") {     // Mockito version taken from the Spring Boot BOM 3.4.0
+        isTransitive = false
+    }
+}
+
+tasks.test {
+    // Loads mockito-core library as a Java agent during test start-up
+    jvmArgs("-javaagent:${mockitoAgent.asPath}")
 }

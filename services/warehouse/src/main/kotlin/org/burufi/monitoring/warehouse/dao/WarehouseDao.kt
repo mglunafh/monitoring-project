@@ -14,6 +14,8 @@ import java.time.LocalDateTime
 @Component
 class WarehouseDao(private val jdbcTemplate: NamedParameterJdbcTemplate) {
 
+    private val keyColumns = arrayOf("id")
+
     fun getGoodsList(): List<GoodsItem> {
         return jdbcTemplate.query("select * from goods", RowMappers.GoodsItemRowMapper)
     }
@@ -35,9 +37,10 @@ class WarehouseDao(private val jdbcTemplate: NamedParameterJdbcTemplate) {
         jdbcTemplate.update(
             "insert into supply_contracts(supplier_id, sign_date, total_cost) values(:id, :date, :cost)",
             MapSqlParameterSource(mapOf("id" to supplierId, "date" to signDate,  "cost" to cost)),
-            keyHolder
+            keyHolder,
+            keyColumns
         )
-        return keyHolder.keys!!["id"] as Int        // <-- screams as a potential source of problems
+        return keyHolder.key as Int
     }
 
     fun registerContractItems(contractId: Int, items: List<ContractItemOrderDto>) {

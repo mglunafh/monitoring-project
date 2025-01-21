@@ -8,13 +8,14 @@
   - `IPMN-18` -- add tracing to 'Deliveries'
   - `IPMN-21` -- deploy grafana with dashboards (https://stackoverflow.com/questions/63518460/grafana-import-dashboard-as-part-of-docker-compose)
 - `IPMN-20` -- implement 'Warehouse' app
-  - `IPMN-22` -- add JDBC-layer tests
+  - `IPMN-28` -- add `Reserve a quantity of item` endpoint
 - `IPMN-26` -- think about extracting exceptions into a separate module 
 
 ---------
 
 ### Done
 
+- `IPMN-22` -- add JDBC-layer tests
 - `IPMN-24` -- add Warehouse to the compose file
 - `IPMN-27` -- introduce 'Contract info' endpoint
 - `IPMN-23` -- introduce 'Contract' entity, add 'Add contract' endpoint
