@@ -13,7 +13,7 @@ object RowMappers {
     /**
      * Extracts the integer value of 'count' column of a query result.
      */
-    object SupplierExistsRowMapper : RowMapper<Int> {
+    object RecordExistsRowMapper : RowMapper<Int> {
         override fun mapRow(rs: ResultSet, rowNum: Int) = rs.getInt("count")
     }
 

@@ -4,6 +4,7 @@ import org.burufi.monitoring.dto.warehouse.ContractInfo
 import org.burufi.monitoring.dto.warehouse.GoodsItemDto
 import org.burufi.monitoring.dto.warehouse.RegisterContractRequest
 import org.burufi.monitoring.dto.warehouse.RegisteredContract
+import org.burufi.monitoring.dto.warehouse.ReserveItemRequest
 import org.burufi.monitoring.dto.warehouse.SupplierDto
 import org.burufi.monitoring.warehouse.dao.WarehouseDao
 import org.burufi.monitoring.warehouse.exception.FailureType
@@ -52,5 +53,16 @@ class WarehouseService(private val dao: WarehouseDao) {
     @Transactional
     fun getContractInfo(contractId: Int): ContractInfo? {
         return dao.getContractInfo(contractId)
+    }
+
+    @Transactional
+    fun reserve(request: ReserveItemRequest): Boolean {
+        val itemExists = dao.itemExists(request.itemId)
+        if (!itemExists) return false
+
+        val reserveTime = LocalDateTime.now()
+        dao.reserveItem(request.shoppingCartId, request.itemId, request.amount, reserveTime)
+
+        return true
     }
 }

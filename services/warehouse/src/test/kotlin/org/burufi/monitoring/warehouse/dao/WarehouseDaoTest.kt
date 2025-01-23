@@ -1,12 +1,12 @@
 package org.burufi.monitoring.warehouse.dao
 
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.tuple
 import org.burufi.monitoring.dto.warehouse.ContractItemOrderDto
 import org.burufi.monitoring.warehouse.dao.record.Amount
 import org.burufi.monitoring.warehouse.dao.record.GoodsItem
 import org.burufi.monitoring.warehouse.dao.record.ItemType
 import org.burufi.monitoring.warehouse.dao.record.Supplier
+import org.burufi.monitoring.warehouse.exception.FailureType
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
@@ -75,8 +75,10 @@ class WarehouseDaoTest {
         assertThat(dao.getSuppliersList()).isEmpty()
         save(TEST_SUPPLIER)
 
-        assertThat(dao.getSuppliersList()).extracting("name", "description")
-            .contains(tuple(TEST_SUPPLIER.name, TEST_SUPPLIER.description))
+        assertThat(dao.getSuppliersList())
+            .usingRecursiveComparison()
+            .ignoringFields("id")
+            .isEqualTo(listOf(TEST_SUPPLIER))
     }
 
     @Test
@@ -85,8 +87,10 @@ class WarehouseDaoTest {
         save(TEST_ITEM)
 
         val goodsList = dao.getGoodsList()
-        assertThat(goodsList).extracting("name", "category", "amount", "weight")
-            .contains(tuple(TEST_ITEM.name, TEST_ITEM.category, TEST_ITEM.amount.n, TEST_ITEM.weight))
+        assertThat(goodsList)
+            .usingRecursiveComparison()
+            .ignoringFields("id")
+            .isEqualTo(listOf(TEST_ITEM))
     }
 
     @Test
@@ -125,11 +129,48 @@ class WarehouseDaoTest {
         dao.registerContractItems(contractId, contractItems)
 
         val goods = dao.getGoodsList()
-        assertThat(goods).extracting("id", "amount")
-            .contains(
-                tuple(itemId1, TEST_ITEM.amount.n + 2),
-                tuple(itemId2, MOCK_ITEM.amount.n + 3)
-            )
+        assertThat(goods)
+            .usingRecursiveComparison()
+            .ignoringFields("id")
+            .isEqualTo(listOf(
+                TEST_ITEM.copy(amount = TEST_ITEM.amount.plus(2)),
+                MOCK_ITEM.copy(amount = MOCK_ITEM.amount.plus(3))
+            ))
+    }
+
+    @Test
+    fun `Test item existence`() {
+        val id = save(TEST_ITEM)
+
+        assertThat(dao.itemExists(id)).isTrue
+        assertThat(dao.itemExists(id + 1)).isFalse
+    }
+
+    @Test
+    fun `Test reserve item`() {
+        val id = save(TEST_ITEM)
+        val shoppingCart = "test-shopping-cart-id"
+        val reserveTime = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
+        dao.reserveItem(shoppingCart, id, 1, reserveTime)
+
+        val itemInDB = persistedItem(id)
+        assertThat(itemInDB)
+            .usingRecursiveComparison()
+            .ignoringFields("id")
+            .isEqualTo(TEST_ITEM.copy(amount = TEST_ITEM.amount.plus(-1)))
+    }
+
+    @Test
+    fun `Test reserve too much`() {
+        val id = save(TEST_ITEM)
+        val shoppingCart = "test-shopping-cart-id"
+        val reserveTime = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
+
+        val errorResult = runCatching { dao.reserveItem(shoppingCart, id, TEST_ITEM.amount.n + 1, reserveTime) }
+
+        assertThat(errorResult.exceptionOrNull())
+            .extracting("failure")
+            .isEqualTo(FailureType.RESERVE_TOO_MANY_ITEMS)
     }
 
     private fun save(supplier: Supplier): Int {
@@ -151,5 +192,9 @@ class WarehouseDaoTest {
             arrayOf("id")
         )
         return keyHolder.key as Int
+    }
+
+    private fun persistedItem(id: Int): GoodsItem {
+        return jdbcTemplate.queryForObject("select * from goods where id = :id", mapOf("id" to id), RowMappers.GoodsItemRowMapper)!!
     }
 }

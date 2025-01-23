@@ -11,6 +11,7 @@ import org.burufi.monitoring.dto.warehouse.ListGoods
 import org.burufi.monitoring.dto.warehouse.ListSuppliers
 import org.burufi.monitoring.dto.warehouse.RegisterContractRequest
 import org.burufi.monitoring.dto.warehouse.RegisteredContract
+import org.burufi.monitoring.dto.warehouse.ReserveItemRequest
 import org.burufi.monitoring.warehouse.service.WarehouseService
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
@@ -74,6 +75,26 @@ class WarehouseController(private val service: WarehouseService) {
             return ResponseEntity.status(HttpStatusCode.valueOf(404)).body(body)
         }
         return ResponseEntity.ok(result.toResponse())
+    }
+
+    @PostMapping("/reserve")
+    fun reserveItem(
+        @Valid @RequestBody reserveRequest: ReserveItemRequest,
+        errors: Errors
+    ): ResponseEntity<MyResponse<Nothing>> {
+        if (errors.hasFieldErrors()) {
+            val message = errors.fieldErrors.joinToString(separator = " ") {
+                "Field '${it.field}': ${it.defaultMessage}, got '${it.rejectedValue}' instead."
+            }
+            return ResponseEntity.badRequest().body(MyResponse.error(VALIDATION_FAILURE, message))
+        }
+        val itemReserved = service.reserve(reserveRequest)
+        if (!itemReserved) {
+            val message = "Item with id '${reserveRequest.itemId}' does not exist."
+            return ResponseEntity.badRequest().body(MyResponse.error(VALIDATION_FAILURE, message))
+        }
+
+        return ResponseEntity.ok(MyResponse(ResponseCode.OK, null, null))
     }
 
     private fun duplicateIds(items: List<ContractItemOrderDto>): Set<Int> {

@@ -6,5 +6,6 @@ package org.burufi.monitoring.warehouse.exception
 enum class FailureType {
     SUPPLIER_ID_NOT_FOUND,
     PRODUCT_ID_NOT_FOUND,
+    RESERVE_TOO_MANY_ITEMS,
     GENERIC_DATABASE_FAILURE
 }

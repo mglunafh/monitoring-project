@@ -17,6 +17,8 @@ class WarehouseExceptionHandler {
     companion object {
         const val SUPPLIER_ID_NOT_REGISTERED = "Non-existent supplier ID was used in the contract."
         const val PRODUCT_ID_NOT_REGISTERED = "Non-existent product ID was mentioned in the contract."
+        const val TOO_FEW_ITEMS_CURRENTLY = "Currently there are too few items to reserve. " +
+                "Please order the smaller amount or try again later."
 
         const val UNEXPECTED_SERVER_ERROR = "Unexpected server error."
 
@@ -28,6 +30,7 @@ class WarehouseExceptionHandler {
         val response : MyResponse<Nothing> = when (ex.failure) {
             FailureType.SUPPLIER_ID_NOT_FOUND -> MyResponse.error(VALIDATION_FAILURE, SUPPLIER_ID_NOT_REGISTERED)
             FailureType.PRODUCT_ID_NOT_FOUND -> MyResponse.error(VALIDATION_FAILURE, PRODUCT_ID_NOT_REGISTERED)
+            FailureType.RESERVE_TOO_MANY_ITEMS -> MyResponse.error(INTERNAL_SERVER_ERROR, TOO_FEW_ITEMS_CURRENTLY)
             FailureType.GENERIC_DATABASE_FAILURE -> MyResponse.error(
                 INTERNAL_SERVER_ERROR,
                 ex.details ?: "Unspecified database error")

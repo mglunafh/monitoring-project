@@ -4,12 +4,15 @@ import org.burufi.monitoring.dto.warehouse.ContractInfo
 import org.burufi.monitoring.dto.warehouse.GoodsItemDto
 import org.burufi.monitoring.dto.warehouse.RegisteredContract
 import org.burufi.monitoring.dto.warehouse.SupplierDto
+import org.burufi.monitoring.warehouse.exception.FailureType
+import org.burufi.monitoring.warehouse.exception.WarehouseException
 import org.burufi.monitoring.warehouse.service.WarehouseService
 import org.hamcrest.core.StringContains
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.doThrow
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.http.MediaType.APPLICATION_JSON
@@ -137,5 +140,79 @@ class WarehouseControllerTest {
             .andExpect(MockMvcResultMatchers.status().isNotFound)
             .andExpect(MockMvcResultMatchers.jsonPath("$.responseCode").value("NOT_FOUND"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value("Contract with id '15' is not found"))
+    }
+
+    @Test
+    fun `Test reserve for empty shopping cart ID`() {
+        val badRequest = """{ "shoppingCartId": " ", "itemId": 10, "amount": 10 }"""
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/warehouse/reserve")
+            .content(badRequest)
+            .contentType(APPLICATION_JSON)
+            .accept(APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.status().isBadRequest)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.responseCode").value("VALIDATION_FAILURE"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value(
+                StringContains.containsString("Field 'shoppingCartId': ShoppingCart ID must not be blank, got ' ' instead")
+            ))
+    }
+
+    @Test
+    fun `Test reserve a negative amount`() {
+        val badRequest = """{ "shoppingCartId": "test-shopping-cart-1", "itemId": 10, "amount": -10 }"""
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/warehouse/reserve")
+            .content(badRequest)
+            .contentType(APPLICATION_JSON)
+            .accept(APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.status().isBadRequest)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.responseCode").value("VALIDATION_FAILURE"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value(
+                StringContains.containsString("Field 'amount': Amount of items to reserve must be positive, got '-10' instead")))
+    }
+
+    @Test
+    fun `Test reserve item`() {
+        val request = """{ "shoppingCartId": "test-shopping-cart-1", "itemId": 15, "amount": 10 }"""
+        doReturn(true).`when`(warehouseService).reserve(any())
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/warehouse/reserve")
+            .content(request)
+            .contentType(APPLICATION_JSON)
+            .accept(APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.responseCode").value("OK"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.payload").isEmpty)
+    }
+
+    @Test
+    fun `Test reserve non-existent item`() {
+        val itemId = 15
+        val badRequest = """{ "shoppingCartId": "test-shopping-cart-1", "itemId": $itemId, "amount": 10 }"""
+
+        doReturn(false).`when`(warehouseService).reserve(any())
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/warehouse/reserve")
+            .content(badRequest)
+            .contentType(APPLICATION_JSON)
+            .accept(APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.status().isBadRequest)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.responseCode").value("VALIDATION_FAILURE"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value(
+                StringContains.containsString("Item with id '$itemId' does not exist")))
+    }
+
+    @Test
+    fun `Test reserve too much stuff`() {
+        val request = """{ "shoppingCartId": "test-shopping-cart-1", "itemId": 15, "amount": 10 }"""
+        doThrow(WarehouseException(FailureType.RESERVE_TOO_MANY_ITEMS)).`when`(warehouseService).reserve(any())
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/warehouse/reserve")
+            .content(request)
+            .contentType(APPLICATION_JSON)
+            .accept(APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.status().isInternalServerError)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.responseCode").value("INTERNAL_SERVER_ERROR"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value(WarehouseExceptionHandler.TOO_FEW_ITEMS_CURRENTLY))
     }
 }
