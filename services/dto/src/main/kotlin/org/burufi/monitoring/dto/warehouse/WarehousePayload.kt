@@ -13,3 +13,10 @@ data class ListGoods(val goods: List<GoodsItemDto>) : WarehousePayload
 data class RegisteredContract(val id: Int, val signDate: LocalDateTime, val totalCost: BigDecimal) : WarehousePayload
 
 data class ContractInfo(val id: Int, val supplier: String, val signDate: LocalDateTime, val totalCost: BigDecimal) : WarehousePayload
+
+data class CancelledReservation(
+    val shoppingCartId: String,
+    val message: String,
+    val cancelTime: LocalDateTime,
+    val cancelledItems: List<CancelledReservationItemDto> = listOf()
+) : WarehousePayload

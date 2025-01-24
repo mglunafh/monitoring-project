@@ -1,5 +1,7 @@
 package org.burufi.monitoring.warehouse.controller
 
+import org.burufi.monitoring.dto.warehouse.CancelledReservation
+import org.burufi.monitoring.dto.warehouse.CancelledReservationItemDto
 import org.burufi.monitoring.dto.warehouse.ContractInfo
 import org.burufi.monitoring.dto.warehouse.GoodsItemDto
 import org.burufi.monitoring.dto.warehouse.RegisteredContract
@@ -214,5 +216,42 @@ class WarehouseControllerTest {
             .andExpect(MockMvcResultMatchers.status().isInternalServerError)
             .andExpect(MockMvcResultMatchers.jsonPath("$.responseCode").value("INTERNAL_SERVER_ERROR"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value(WarehouseExceptionHandler.TOO_FEW_ITEMS_CURRENTLY))
+    }
+
+    @Test
+    fun `Test cancel reservation for empty shopping cart ID`() {
+        val badRequest = """{ "shoppingCartId": "  " }"""
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/warehouse/cancel")
+            .content(badRequest)
+            .contentType(APPLICATION_JSON)
+            .accept(APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.status().isBadRequest)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.responseCode").value("VALIDATION_FAILURE"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value(
+                StringContains.containsString("Field 'shoppingCartId': ShoppingCart ID must not be blank, got '  ' instead")
+            ))
+    }
+
+    @Test
+    fun `Test cancel reservation`() {
+        val request = """{ "shoppingCartId": "test-shopping-cart" }"""
+        val item = CancelledReservationItemDto(id = 3, amount = 5)
+        val cancelTime = LocalDateTime.of(2020, 1, 1, 10, 30, 0)
+        val cancelledOrder = CancelledReservation("test-shopping-cart", "Some message", cancelTime, listOf(item))
+
+        doReturn(cancelledOrder).`when`(warehouseService).cancelReservation(any())
+        mockMvc.perform(MockMvcRequestBuilders.post("/warehouse/cancel")
+            .content(request)
+            .contentType(APPLICATION_JSON)
+            .accept(APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.responseCode").value("OK"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.payload").isNotEmpty)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.payload.shoppingCartId").value("test-shopping-cart"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.payload.message").value("Some message"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.payload.cancelTime").value("2020-01-01T10:30:00"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.payload.cancelledItems[0].id").value(item.id))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.payload.cancelledItems[0].amount").value(item.amount))
     }
 }

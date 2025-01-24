@@ -4,6 +4,9 @@ import org.burufi.monitoring.dto.warehouse.ContractInfo
 import org.burufi.monitoring.warehouse.dao.record.Amount
 import org.burufi.monitoring.warehouse.dao.record.GoodsItem
 import org.burufi.monitoring.warehouse.dao.record.ItemType
+import org.burufi.monitoring.warehouse.dao.record.ReservationDetails
+import org.burufi.monitoring.warehouse.dao.record.ReservationSummary
+import org.burufi.monitoring.warehouse.dao.record.ReserveStatus
 import org.burufi.monitoring.warehouse.dao.record.Supplier
 import org.springframework.jdbc.core.RowMapper
 import java.sql.ResultSet
@@ -64,6 +67,31 @@ object RowMappers {
             val signDate = rs.getTimestamp("sign_date")
             val contractCost = rs.getBigDecimal("total_cost")
             return ContractInfo(id, supplierName, signDate.toLocalDateTime(), contractCost)
+        }
+    }
+
+    /**
+     * Extracts the information about reservation status history of the shopping cart ID,
+     *      such as shopping cart ID, item ID and its total reserved amount.
+     */
+    object ReservationSummaryRowMapper : RowMapper<ReservationSummary> {
+        override fun mapRow(rs: ResultSet, rowNum: Int): ReservationSummary {
+            val shoppingCartId = rs.getString("shopping_cart_id")
+            val status = ReserveStatus.valueOf(rs.getString("status"))
+            val count = rs.getInt("count")
+            return ReservationSummary(shoppingCartId, status, count)
+        }
+    }
+
+    /**
+     * Extracts the information about the list of items reserved with the given shopping cart ID.
+     */
+    object ReservationDetailsRowMapper : RowMapper<ReservationDetails> {
+        override fun mapRow(rs: ResultSet, rowNum: Int): ReservationDetails {
+            val shoppingCartId = rs.getString("shopping_cart_id")
+            val itemId = rs.getInt("item_id")
+            val amount = Amount(rs.getInt("amount"))
+            return ReservationDetails(shoppingCartId, itemId, amount)
         }
     }
 }

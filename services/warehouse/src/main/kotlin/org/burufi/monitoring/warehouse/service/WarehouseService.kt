@@ -1,5 +1,7 @@
 package org.burufi.monitoring.warehouse.service
 
+import org.burufi.monitoring.dto.warehouse.CancelledReservation
+import org.burufi.monitoring.dto.warehouse.CancelledReservationItemDto
 import org.burufi.monitoring.dto.warehouse.ContractInfo
 import org.burufi.monitoring.dto.warehouse.GoodsItemDto
 import org.burufi.monitoring.dto.warehouse.RegisterContractRequest
@@ -64,5 +66,23 @@ class WarehouseService(private val dao: WarehouseDao) {
         dao.reserveItem(request.shoppingCartId, request.itemId, request.amount, reserveTime)
 
         return true
+    }
+
+    @Transactional
+    fun cancelReservation(shoppingCartId: String): CancelledReservation {
+        val reservationCancelled = dao.isReservationProcessed(shoppingCartId)
+        val cancelTime = LocalDateTime.now()
+        if (reservationCancelled) {
+            return CancelledReservation(shoppingCartId, "Reservation does not exist or has already been processed", cancelTime)
+        }
+
+        val cancelledItems = dao.cancelReservation(shoppingCartId, cancelTime)
+
+        return CancelledReservation(
+            shoppingCartId = shoppingCartId,
+            message = "Reservation was successfully cancelled",
+            cancelTime = cancelTime,
+            cancelledItems = cancelledItems.map { CancelledReservationItemDto(it.itemId, it.amount.n) }
+        )
     }
 }

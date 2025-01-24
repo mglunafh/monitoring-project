@@ -3,7 +3,10 @@ package org.burufi.monitoring.warehouse.dao
 import org.burufi.monitoring.dto.warehouse.ContractInfo
 import org.burufi.monitoring.dto.warehouse.ContractItemOrderDto
 import org.burufi.monitoring.warehouse.dao.record.GoodsItem
+import org.burufi.monitoring.warehouse.dao.record.ReservationDetails
 import org.burufi.monitoring.warehouse.dao.record.ReserveStatus
+import org.burufi.monitoring.warehouse.dao.record.ReserveStatus.CANCELLED
+import org.burufi.monitoring.warehouse.dao.record.ReserveStatus.PAID
 import org.burufi.monitoring.warehouse.dao.record.Supplier
 import org.burufi.monitoring.warehouse.exception.FailureType
 import org.burufi.monitoring.warehouse.exception.WarehouseException
@@ -98,5 +101,47 @@ class WarehouseDao(private val jdbcTemplate: NamedParameterJdbcTemplate) {
                 "status" to ReserveStatus.RESERVED.name
             )
         )
+    }
+
+    fun isReservationProcessed(shoppingCartId: String): Boolean {
+        val reservationSummary = jdbcTemplate.query(
+            """
+            select shopping_cart_id,status,count(status) from goods_reserve
+                where shopping_cart_id = :id
+                group by shopping_cart_id,status
+            """.trimIndent(),
+            mapOf("id" to shoppingCartId),
+            RowMappers.ReservationSummaryRowMapper
+        )
+
+        return when {
+            reservationSummary.isEmpty() -> true
+            reservationSummary.any { (it.status == CANCELLED || it.status == PAID) && it.count > 0 } -> true
+            else -> false
+        }
+    }
+
+    fun cancelReservation(shoppingCartId: String, cancelTime: LocalDateTime): List<ReservationDetails> {
+        val itemsReserved = jdbcTemplate.query(
+            """
+                select shopping_cart_id,item_id,sum(amount) as amount from goods_reserve
+                    where status = 'RESERVED' and shopping_cart_id = :id
+                    group by shopping_cart_id,item_id
+            """.trimIndent(),
+            mapOf("id" to shoppingCartId),
+            RowMappers.ReservationDetailsRowMapper
+        )
+
+        if (itemsReserved.isEmpty()) return listOf()
+
+        val baseJdbcTemplate = jdbcTemplate.jdbcTemplate
+        baseJdbcTemplate.batchUpdate(
+            CancelReservationUpdater.CANCEL_ITEM_RESERVATION,
+            CancelReservationUpdater(shoppingCartId, cancelTime, itemsReserved))
+        baseJdbcTemplate.batchUpdate(
+            CancelReservationStoreUpdater.RESTORE_ITEM_AMOUNT_QUERY,
+            CancelReservationStoreUpdater(itemsReserved))
+
+        return itemsReserved
     }
 }

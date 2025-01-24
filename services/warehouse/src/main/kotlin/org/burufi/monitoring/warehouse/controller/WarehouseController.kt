@@ -5,6 +5,8 @@ import org.burufi.monitoring.dto.MyResponse
 import org.burufi.monitoring.dto.MyResponse.Companion.toResponse
 import org.burufi.monitoring.dto.ResponseCode
 import org.burufi.monitoring.dto.ResponseCode.VALIDATION_FAILURE
+import org.burufi.monitoring.dto.warehouse.CancelledReservation
+import org.burufi.monitoring.dto.warehouse.CancelReserveRequest
 import org.burufi.monitoring.dto.warehouse.ContractInfo
 import org.burufi.monitoring.dto.warehouse.ContractItemOrderDto
 import org.burufi.monitoring.dto.warehouse.ListGoods
@@ -95,6 +97,22 @@ class WarehouseController(private val service: WarehouseService) {
         }
 
         return ResponseEntity.ok(MyResponse(ResponseCode.OK, null, null))
+    }
+
+    @PostMapping("/cancel")
+    fun cancelReservation(
+        @Valid @RequestBody cancelReserveRequest: CancelReserveRequest,
+        errors: Errors
+    ) : ResponseEntity<MyResponse<CancelledReservation>> {
+        if (errors.hasFieldErrors()) {
+            val message = errors.fieldErrors.joinToString(separator = " ") {
+                "Field '${it.field}': ${it.defaultMessage}, got '${it.rejectedValue}' instead."
+            }
+            return ResponseEntity.badRequest().body(MyResponse.error(VALIDATION_FAILURE, message))
+        }
+
+        val result = service.cancelReservation(cancelReserveRequest.shoppingCartId)
+        return ResponseEntity.ok(result.toResponse())
     }
 
     private fun duplicateIds(items: List<ContractItemOrderDto>): Set<Int> {

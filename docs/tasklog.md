@@ -8,14 +8,15 @@
   - `IPMN-18` -- add tracing to 'Deliveries'
   - `IPMN-21` -- deploy grafana with dashboards (https://stackoverflow.com/questions/63518460/grafana-import-dashboard-as-part-of-docker-compose)
 - `IPMN-20` -- implement 'Warehouse' app
-  - `IPMN-29` -- add `Cancel shopping cart` endpoint
-  - `IPMN-30` -- reserve item: move exception handling from DAO; register contract: adapt PSQLException 
+  - `IPMN-30` -- reserve item: move exception handling from DAO; register contract: adapt PSQLException
+  - `IPMN-31` -- add 'Buy out shopping cart' endpoint
 - `IPMN-26` -- think about extracting exceptions into a separate module 
 
 ---------
 
 ### Done
 
+- `IPMN-29` -- add `Cancel shopping cart` endpoint
 - `IPMN-28` -- add `Reserve a quantity of item` endpoint
 - `IPMN-22` -- add JDBC-layer tests
 - `IPMN-24` -- add Warehouse to the compose file

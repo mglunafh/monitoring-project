@@ -1,6 +1,7 @@
 package org.burufi.monitoring.warehouse.dao
 
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.tuple
 import org.burufi.monitoring.dto.warehouse.ContractItemOrderDto
 import org.burufi.monitoring.warehouse.dao.record.Amount
 import org.burufi.monitoring.warehouse.dao.record.GoodsItem
@@ -132,10 +133,7 @@ class WarehouseDaoTest {
         assertThat(goods)
             .usingRecursiveComparison()
             .ignoringFields("id")
-            .isEqualTo(listOf(
-                TEST_ITEM.copy(amount = TEST_ITEM.amount.plus(2)),
-                MOCK_ITEM.copy(amount = MOCK_ITEM.amount.plus(3))
-            ))
+            .isEqualTo(listOf(TEST_ITEM.plusItems(2), MOCK_ITEM.plusItems(3)))
     }
 
     @Test
@@ -157,7 +155,7 @@ class WarehouseDaoTest {
         assertThat(itemInDB)
             .usingRecursiveComparison()
             .ignoringFields("id")
-            .isEqualTo(TEST_ITEM.copy(amount = TEST_ITEM.amount.plus(-1)))
+            .isEqualTo(TEST_ITEM.minusItems(1))
     }
 
     @Test
@@ -171,6 +169,49 @@ class WarehouseDaoTest {
         assertThat(errorResult.exceptionOrNull())
             .extracting("failure")
             .isEqualTo(FailureType.RESERVE_TOO_MANY_ITEMS)
+    }
+
+    @Test
+    fun `Test status of ongoing reservation`() {
+        val id = save(TEST_ITEM)
+        val shoppingCart = "test-shopping-cart-id"
+        val reserveTime = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
+        dao.reserveItem(shoppingCart, id, 1, reserveTime)
+
+        val result = dao.isReservationProcessed(shoppingCart)
+
+        assertThat(result).isFalse
+    }
+
+    @Test
+    fun `Test cancel reservation`() {
+        val testId = save(TEST_ITEM)
+        val mockId = save(MOCK_ITEM)
+        val shoppingCart = "test-shopping-cart-id"
+        val reserveTime = LocalDateTime.now().minusMinutes(10).truncatedTo(ChronoUnit.SECONDS)
+        val cancelTime = reserveTime.plusMinutes(1)
+        dao.reserveItem(shoppingCart, testId, 1, reserveTime)
+        dao.reserveItem(shoppingCart, mockId, 2, reserveTime)
+        dao.reserveItem(shoppingCart, mockId, 3, reserveTime)
+
+        val itemsAfterReservation = listOf(testId, mockId).map { persistedItem(it) }
+        assertThat(itemsAfterReservation)
+            .usingRecursiveComparison()
+            .ignoringFields("id")
+            .isEqualTo(listOf(TEST_ITEM.minusItems(1), MOCK_ITEM.minusItems(5)))
+
+
+        val cancelledItems = dao.cancelReservation(shoppingCart, cancelTime)
+
+        assertThat(cancelledItems).extracting("shoppingCartId", "itemId", "amount")
+            .containsExactly(tuple(shoppingCart, testId, 1), tuple(shoppingCart, mockId, 5))
+        assertThat(dao.isReservationProcessed(shoppingCart)).isTrue
+
+        val itemsAfterCancellation = listOf(testId, mockId).map { persistedItem(it) }
+        assertThat(itemsAfterCancellation)
+            .usingRecursiveComparison()
+            .ignoringFields("id")
+            .isEqualTo(listOf(TEST_ITEM, MOCK_ITEM))
     }
 
     private fun save(supplier: Supplier): Int {
@@ -197,4 +238,9 @@ class WarehouseDaoTest {
     private fun persistedItem(id: Int): GoodsItem {
         return jdbcTemplate.queryForObject("select * from goods where id = :id", mapOf("id" to id), RowMappers.GoodsItemRowMapper)!!
     }
+
+    private fun GoodsItem.plusItems(n: Int) = this.copy(amount = Amount(amount.n + n))
+
+    private fun GoodsItem.minusItems(n: Int) = this.copy(amount = Amount(amount.n - n))
+
 }
