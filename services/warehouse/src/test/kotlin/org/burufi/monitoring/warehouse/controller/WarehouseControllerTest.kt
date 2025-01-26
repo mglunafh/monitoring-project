@@ -120,6 +120,25 @@ class WarehouseControllerTest {
     }
 
     @Test
+    fun `Test register contract, but item ID is not in the database goods list`() {
+        val badRequest = """
+            { "suppliedId": 100, "items": [ { "id": 15, "price": 10, "amount": 2 } ] }
+        """.trimIndent()
+
+        doThrow(WarehouseException(FailureType.ProductIdNotFound("Item 15 not found.")))
+            .`when`(warehouseService).registerContract(any())
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/warehouse/contract")
+            .content(badRequest)
+            .contentType(APPLICATION_JSON)
+            .accept(APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.status().isBadRequest)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.responseCode").value("VALIDATION_FAILURE"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage")
+                .value(StringContains.containsString("Item 15 not found.")))
+    }
+
+    @Test
     fun `Test contract info`() {
         val result = ContractInfo(15, "Test Supplier", LocalDateTime.of(2020, 1, 1, 12, 0), BigDecimal(550))
         doReturn(result).`when`(warehouseService).getContractInfo(15)
@@ -208,7 +227,7 @@ class WarehouseControllerTest {
     @Test
     fun `Test reserve too much stuff`() {
         val request = """{ "shoppingCartId": "test-shopping-cart-1", "itemId": 15, "amount": 10 }"""
-        doThrow(WarehouseException(FailureType.RESERVE_TOO_MANY_ITEMS)).`when`(warehouseService).reserve(any())
+        doThrow(WarehouseException(FailureType.ReserveTooManyItems)).`when`(warehouseService).reserve(any())
 
         mockMvc.perform(MockMvcRequestBuilders.post("/warehouse/reserve")
             .content(request)

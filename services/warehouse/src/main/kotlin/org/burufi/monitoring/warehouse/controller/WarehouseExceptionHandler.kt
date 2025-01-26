@@ -16,7 +16,6 @@ class WarehouseExceptionHandler {
 
     companion object {
         const val SUPPLIER_ID_NOT_REGISTERED = "Non-existent supplier ID was used in the contract."
-        const val PRODUCT_ID_NOT_REGISTERED = "Non-existent product ID was mentioned in the contract."
         const val TOO_FEW_ITEMS_CURRENTLY = "Currently there are too few items to reserve. " +
                 "Please order the smaller amount or try again later."
 
@@ -27,13 +26,18 @@ class WarehouseExceptionHandler {
 
     @ExceptionHandler
     fun businessException(ex: WarehouseException): ResponseEntity<MyResponse<Nothing>> {
-        val response : MyResponse<Nothing> = when (ex.failure) {
-            FailureType.SUPPLIER_ID_NOT_FOUND -> MyResponse.error(VALIDATION_FAILURE, SUPPLIER_ID_NOT_REGISTERED)
-            FailureType.PRODUCT_ID_NOT_FOUND -> MyResponse.error(VALIDATION_FAILURE, PRODUCT_ID_NOT_REGISTERED)
-            FailureType.RESERVE_TOO_MANY_ITEMS -> MyResponse.error(INTERNAL_SERVER_ERROR, TOO_FEW_ITEMS_CURRENTLY)
-            FailureType.GENERIC_DATABASE_FAILURE -> MyResponse.error(
+        val response : MyResponse<Nothing> = when (val failure = ex.failure) {
+            FailureType.SupplierIdNotFound -> MyResponse.error(VALIDATION_FAILURE, SUPPLIER_ID_NOT_REGISTERED)
+
+            is FailureType.ProductIdNotFound -> MyResponse.error(
+                VALIDATION_FAILURE,
+                "Non-existent product ID was mentioned in the contract. ${failure.message ?: ""}")
+
+            FailureType.ReserveTooManyItems -> MyResponse.error(INTERNAL_SERVER_ERROR, TOO_FEW_ITEMS_CURRENTLY)
+
+            is FailureType.GenericDatabaseFailure -> MyResponse.error(
                 INTERNAL_SERVER_ERROR,
-                ex.details ?: "Unspecified database error")
+                failure.cause.message ?: "Unspecified database error")
         }
         return when (response.responseCode) {
             ResponseCode.OK -> ResponseEntity.ok(response)

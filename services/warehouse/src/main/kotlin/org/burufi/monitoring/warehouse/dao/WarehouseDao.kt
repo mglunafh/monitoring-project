@@ -8,9 +8,6 @@ import org.burufi.monitoring.warehouse.dao.record.ReserveStatus
 import org.burufi.monitoring.warehouse.dao.record.ReserveStatus.CANCELLED
 import org.burufi.monitoring.warehouse.dao.record.ReserveStatus.PAID
 import org.burufi.monitoring.warehouse.dao.record.Supplier
-import org.burufi.monitoring.warehouse.exception.FailureType
-import org.burufi.monitoring.warehouse.exception.WarehouseException
-import org.postgresql.util.PSQLException
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.support.GeneratedKeyHolder
@@ -74,21 +71,10 @@ class WarehouseDao(private val jdbcTemplate: NamedParameterJdbcTemplate) {
     }
 
     fun reserveItem(shoppingCartId: String, id: Int, amount: Int, reserveTime: LocalDateTime) {
-        try {
-            jdbcTemplate.update(
-                "update goods set amount = amount - :amount where id = :id",
-                mapOf("id" to id, "amount" to amount)
-            )
-        } catch (ex: Exception) {
-            val cause = ex.cause as? PSQLException
-            val errorMessage = cause?.serverErrorMessage
-            throw when {
-                cause == null || errorMessage == null -> WarehouseException(FailureType.GENERIC_DATABASE_FAILURE, ex.message)
-                errorMessage.constraint == "goods_amount_check" -> WarehouseException(FailureType.RESERVE_TOO_MANY_ITEMS)
-                else -> WarehouseException(FailureType.GENERIC_DATABASE_FAILURE, ex.message)
-            }
-        }
-
+        jdbcTemplate.update(
+            "update goods set amount = amount - :amount where id = :id",
+            mapOf("id" to id, "amount" to amount)
+        )
         jdbcTemplate.update("""
             insert into goods_reserve(shopping_cart_id, item_id, amount, action_time, status) values
                 (:shoppingCardId, :itemId, :amount, :actionTime, :status)

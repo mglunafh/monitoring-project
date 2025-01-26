@@ -7,13 +7,14 @@ import org.burufi.monitoring.warehouse.dao.record.Amount
 import org.burufi.monitoring.warehouse.dao.record.GoodsItem
 import org.burufi.monitoring.warehouse.dao.record.ItemType
 import org.burufi.monitoring.warehouse.dao.record.Supplier
-import org.burufi.monitoring.warehouse.exception.FailureType
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
+import org.postgresql.util.PSQLException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.support.GeneratedKeyHolder
@@ -22,6 +23,7 @@ import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.context.jdbc.Sql
 import org.testcontainers.containers.PostgreSQLContainer
 import java.math.BigDecimal
+import java.sql.BatchUpdateException
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import kotlin.test.Test
@@ -76,9 +78,7 @@ class WarehouseDaoTest {
         assertThat(dao.getSuppliersList()).isEmpty()
         save(TEST_SUPPLIER)
 
-        assertThat(dao.getSuppliersList())
-            .usingRecursiveComparison()
-            .ignoringFields("id")
+        assertThat(dao.getSuppliersList()).usingRecursiveComparison().ignoringFields("id")
             .isEqualTo(listOf(TEST_SUPPLIER))
     }
 
@@ -88,9 +88,7 @@ class WarehouseDaoTest {
         save(TEST_ITEM)
 
         val goodsList = dao.getGoodsList()
-        assertThat(goodsList)
-            .usingRecursiveComparison()
-            .ignoringFields("id")
+        assertThat(goodsList).usingRecursiveComparison().ignoringFields("id")
             .isEqualTo(listOf(TEST_ITEM))
     }
 
@@ -130,10 +128,30 @@ class WarehouseDaoTest {
         dao.registerContractItems(contractId, contractItems)
 
         val goods = dao.getGoodsList()
-        assertThat(goods)
-            .usingRecursiveComparison()
-            .ignoringFields("id")
+        assertThat(goods).usingRecursiveComparison().ignoringFields("id")
             .isEqualTo(listOf(TEST_ITEM.plusItems(2), MOCK_ITEM.plusItems(3)))
+    }
+
+    @Test
+    fun `Test register non-existent contract items`() {
+        val supplierId = save(TEST_SUPPLIER)
+        val itemId1 = save(TEST_ITEM)
+        val signDate = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
+        val contractId = dao.createContract(supplierId, signDate, BigDecimal(55))
+        val contractItems = listOf(
+            ContractItemOrderDto(itemId1, BigDecimal.valueOf(20), 2),
+            ContractItemOrderDto(itemId1 + 1, BigDecimal.valueOf(5), 3)
+        )
+
+        val errorResult = runCatching { dao.registerContractItems(contractId, contractItems) }
+
+        assertThat(errorResult.exceptionOrNull())
+            .isInstanceOf(DataIntegrityViolationException::class.java)
+            .hasCauseInstanceOf(BatchUpdateException::class.java)
+            .hasRootCauseInstanceOf(PSQLException::class.java)
+            .extracting("cause.cause.serverErrorMessage")
+            .extracting("table", "constraint")
+            .isEqualTo(listOf("goods_in_contract", "goods_in_contract_item_id_fkey"))
     }
 
     @Test
@@ -152,9 +170,7 @@ class WarehouseDaoTest {
         dao.reserveItem(shoppingCart, id, 1, reserveTime)
 
         val itemInDB = persistedItem(id)
-        assertThat(itemInDB)
-            .usingRecursiveComparison()
-            .ignoringFields("id")
+        assertThat(itemInDB).usingRecursiveComparison().ignoringFields("id")
             .isEqualTo(TEST_ITEM.minusItems(1))
     }
 
@@ -167,8 +183,11 @@ class WarehouseDaoTest {
         val errorResult = runCatching { dao.reserveItem(shoppingCart, id, TEST_ITEM.amount.n + 1, reserveTime) }
 
         assertThat(errorResult.exceptionOrNull())
-            .extracting("failure")
-            .isEqualTo(FailureType.RESERVE_TOO_MANY_ITEMS)
+            .isInstanceOf(DataIntegrityViolationException::class.java)
+            .hasCauseInstanceOf(PSQLException::class.java)
+            .extracting("cause.serverErrorMessage")
+            .extracting("table", "constraint")
+            .isEqualTo(listOf("goods", "goods_amount_check"))
     }
 
     @Test
@@ -195,9 +214,7 @@ class WarehouseDaoTest {
         dao.reserveItem(shoppingCart, mockId, 3, reserveTime)
 
         val itemsAfterReservation = listOf(testId, mockId).map { persistedItem(it) }
-        assertThat(itemsAfterReservation)
-            .usingRecursiveComparison()
-            .ignoringFields("id")
+        assertThat(itemsAfterReservation).usingRecursiveComparison().ignoringFields("id")
             .isEqualTo(listOf(TEST_ITEM.minusItems(1), MOCK_ITEM.minusItems(5)))
 
         val cancelledItems = dao.cancelReservation(shoppingCart, cancelTime)
@@ -207,9 +224,7 @@ class WarehouseDaoTest {
         assertThat(dao.isReservationProcessed(shoppingCart)).isTrue
 
         val itemsAfterCancellation = listOf(testId, mockId).map { persistedItem(it) }
-        assertThat(itemsAfterCancellation)
-            .usingRecursiveComparison()
-            .ignoringFields("id")
+        assertThat(itemsAfterCancellation).usingRecursiveComparison().ignoringFields("id")
             .isEqualTo(listOf(TEST_ITEM, MOCK_ITEM))
     }
 
@@ -225,9 +240,7 @@ class WarehouseDaoTest {
         dao.reserveItem(shoppingCart, mockId, 3, reserveTime)
 
         val itemsAfterReservation = listOf(testId, mockId).map { persistedItem(it) }
-        assertThat(itemsAfterReservation)
-            .usingRecursiveComparison()
-            .ignoringFields("id")
+        assertThat(itemsAfterReservation).usingRecursiveComparison().ignoringFields("id")
             .isEqualTo(listOf(TEST_ITEM.minusItems(1), MOCK_ITEM.minusItems(5)))
 
         val purchasedItems = dao.purchaseReservation(shoppingCart, purchaseTime)
@@ -237,9 +250,7 @@ class WarehouseDaoTest {
         assertThat(dao.isReservationProcessed(shoppingCart)).isTrue
 
         val itemsAfterPurchase = listOf(testId, mockId).map { persistedItem(it) }
-        assertThat(itemsAfterPurchase)
-            .usingRecursiveComparison()
-            .ignoringFields("id")
+        assertThat(itemsAfterPurchase).usingRecursiveComparison().ignoringFields("id")
             .isEqualTo(itemsAfterReservation)
     }
 

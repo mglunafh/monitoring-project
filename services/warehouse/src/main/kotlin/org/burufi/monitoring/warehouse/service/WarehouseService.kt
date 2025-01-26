@@ -13,9 +13,11 @@ import org.burufi.monitoring.warehouse.dao.WarehouseDao
 import org.burufi.monitoring.warehouse.exception.FailureType
 import org.burufi.monitoring.warehouse.exception.WarehouseException
 import org.burufi.monitoring.warehouse.mapper.WarehouseMapper
+import org.postgresql.util.PSQLException
 import org.springframework.dao.DataAccessException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.sql.BatchUpdateException
 import java.time.LocalDateTime
 
 @Service
@@ -40,14 +42,23 @@ class WarehouseService(private val dao: WarehouseDao) {
         val contractCost = contract.totalCost
 
         val supplierExists = dao.supplierExists(supplierId)
-        if (!supplierExists) throw WarehouseException(FailureType.SUPPLIER_ID_NOT_FOUND)
+        if (!supplierExists) throw WarehouseException(FailureType.SupplierIdNotFound)
 
         val signDate = LocalDateTime.now()
         val contractId = dao.createContract(supplierId, signDate, contractCost)
         try {
             dao.registerContractItems(contractId, items)
         } catch (ex: DataAccessException) {
-            throw WarehouseException(FailureType.GENERIC_DATABASE_FAILURE, ex.message)
+            // the specific concern is an attempt to register a non-existent item ID inside a batch update.
+            val buex = ex.cause as? BatchUpdateException
+            val cause = buex?.cause as? PSQLException
+            val errorContainer = cause?.serverErrorMessage
+
+            throw when {
+                errorContainer?.constraint == "goods_in_contract_item_id_fkey"
+                    -> WarehouseException(FailureType.ProductIdNotFound(errorContainer.detail))
+                else -> WarehouseException(FailureType.GenericDatabaseFailure(ex))
+            }
         }
 
         return RegisteredContract(contractId, signDate, contractCost)
@@ -64,9 +75,17 @@ class WarehouseService(private val dao: WarehouseDao) {
         if (!itemExists) return false
 
         val reserveTime = LocalDateTime.now()
-        dao.reserveItem(request.shoppingCartId, request.itemId, request.amount, reserveTime)
-
-        return true
+        try {
+            dao.reserveItem(request.shoppingCartId, request.itemId, request.amount, reserveTime)
+            return true
+        } catch (ex: Exception) {
+            // the specific concern is to reserve too many items
+            val psqlErrorContainer = (ex.cause as? PSQLException)?.serverErrorMessage
+            throw when {
+                psqlErrorContainer?.constraint == "goods_amount_check" -> WarehouseException(FailureType.ReserveTooManyItems)
+                else -> WarehouseException(FailureType.GenericDatabaseFailure(ex))
+            }
+        }
     }
 
     @Transactional
