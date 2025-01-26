@@ -1,9 +1,10 @@
 package org.burufi.monitoring.warehouse.controller
 
 import org.burufi.monitoring.dto.warehouse.CancelledReservation
-import org.burufi.monitoring.dto.warehouse.CancelledReservationItemDto
+import org.burufi.monitoring.dto.warehouse.ReservationItemDto
 import org.burufi.monitoring.dto.warehouse.ContractInfo
 import org.burufi.monitoring.dto.warehouse.GoodsItemDto
+import org.burufi.monitoring.dto.warehouse.PurchasedReservation
 import org.burufi.monitoring.dto.warehouse.RegisteredContract
 import org.burufi.monitoring.dto.warehouse.SupplierDto
 import org.burufi.monitoring.warehouse.exception.FailureType
@@ -222,7 +223,7 @@ class WarehouseControllerTest {
     fun `Test cancel reservation for empty shopping cart ID`() {
         val badRequest = """{ "shoppingCartId": "  " }"""
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/warehouse/cancel")
+        mockMvc.perform(MockMvcRequestBuilders.post("/warehouse/reserve/cancel")
             .content(badRequest)
             .contentType(APPLICATION_JSON)
             .accept(APPLICATION_JSON))
@@ -236,12 +237,12 @@ class WarehouseControllerTest {
     @Test
     fun `Test cancel reservation`() {
         val request = """{ "shoppingCartId": "test-shopping-cart" }"""
-        val item = CancelledReservationItemDto(id = 3, amount = 5)
+        val item = ReservationItemDto(id = 3, amount = 5)
         val cancelTime = LocalDateTime.of(2020, 1, 1, 10, 30, 0)
         val cancelledOrder = CancelledReservation("test-shopping-cart", "Some message", cancelTime, listOf(item))
 
         doReturn(cancelledOrder).`when`(warehouseService).cancelReservation(any())
-        mockMvc.perform(MockMvcRequestBuilders.post("/warehouse/cancel")
+        mockMvc.perform(MockMvcRequestBuilders.post("/warehouse/reserve/cancel")
             .content(request)
             .contentType(APPLICATION_JSON)
             .accept(APPLICATION_JSON))
@@ -251,7 +252,44 @@ class WarehouseControllerTest {
             .andExpect(MockMvcResultMatchers.jsonPath("$.payload.shoppingCartId").value("test-shopping-cart"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.payload.message").value("Some message"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.payload.cancelTime").value("2020-01-01T10:30:00"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.payload.cancelledItems[0].id").value(item.id))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.payload.cancelledItems[0].amount").value(item.amount))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.payload.items[0].id").value(item.id))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.payload.items[0].amount").value(item.amount))
+    }
+
+    @Test
+    fun `Test purchase reservation for empty shopping cart ID`() {
+        val badRequest = """{ "shoppingCartId": "  " }"""
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/warehouse/reserve/purchase")
+            .content(badRequest)
+            .contentType(APPLICATION_JSON)
+            .accept(APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.status().isBadRequest)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.responseCode").value("VALIDATION_FAILURE"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value(
+                StringContains.containsString("Field 'shoppingCartId': ShoppingCart ID must not be blank, got '  ' instead")
+            ))
+    }
+
+    @Test
+    fun `Test purchase reservation`() {
+        val request = """{ "shoppingCartId": "test-shopping-cart" }"""
+        val item = ReservationItemDto(id = 3, amount = 5)
+        val purchaseTime = LocalDateTime.of(2020, 1, 1, 10, 30, 0)
+        val purchasedOrder = PurchasedReservation("test-shopping-cart", "Some message", purchaseTime, listOf(item))
+
+        doReturn(purchasedOrder).`when`(warehouseService).finishPurchase(any())
+        mockMvc.perform(MockMvcRequestBuilders.post("/warehouse/reserve/purchase")
+            .content(request)
+            .contentType(APPLICATION_JSON)
+            .accept(APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.responseCode").value("OK"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.payload").isNotEmpty)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.payload.shoppingCartId").value("test-shopping-cart"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.payload.message").value("Some message"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.payload.purchaseTime").value("2020-01-01T10:30:00"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.payload.items[0].id").value(item.id))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.payload.items[0].amount").value(item.amount))
     }
 }

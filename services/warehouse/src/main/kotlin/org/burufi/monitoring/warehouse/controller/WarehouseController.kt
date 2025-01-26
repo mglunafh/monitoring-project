@@ -6,11 +6,12 @@ import org.burufi.monitoring.dto.MyResponse.Companion.toResponse
 import org.burufi.monitoring.dto.ResponseCode
 import org.burufi.monitoring.dto.ResponseCode.VALIDATION_FAILURE
 import org.burufi.monitoring.dto.warehouse.CancelledReservation
-import org.burufi.monitoring.dto.warehouse.CancelReserveRequest
+import org.burufi.monitoring.dto.warehouse.ProcessReserveRequest
 import org.burufi.monitoring.dto.warehouse.ContractInfo
 import org.burufi.monitoring.dto.warehouse.ContractItemOrderDto
 import org.burufi.monitoring.dto.warehouse.ListGoods
 import org.burufi.monitoring.dto.warehouse.ListSuppliers
+import org.burufi.monitoring.dto.warehouse.PurchasedReservation
 import org.burufi.monitoring.dto.warehouse.RegisterContractRequest
 import org.burufi.monitoring.dto.warehouse.RegisteredContract
 import org.burufi.monitoring.dto.warehouse.ReserveItemRequest
@@ -99,9 +100,9 @@ class WarehouseController(private val service: WarehouseService) {
         return ResponseEntity.ok(MyResponse(ResponseCode.OK, null, null))
     }
 
-    @PostMapping("/cancel")
+    @PostMapping("/reserve/cancel")
     fun cancelReservation(
-        @Valid @RequestBody cancelReserveRequest: CancelReserveRequest,
+        @Valid @RequestBody cancelReserveRequest: ProcessReserveRequest,
         errors: Errors
     ) : ResponseEntity<MyResponse<CancelledReservation>> {
         if (errors.hasFieldErrors()) {
@@ -112,6 +113,22 @@ class WarehouseController(private val service: WarehouseService) {
         }
 
         val result = service.cancelReservation(cancelReserveRequest.shoppingCartId)
+        return ResponseEntity.ok(result.toResponse())
+    }
+
+    @PostMapping("/reserve/purchase")
+    fun purchaseReservation(
+        @Valid @RequestBody purchaseRequest: ProcessReserveRequest,
+        errors: Errors
+    ) : ResponseEntity<MyResponse<PurchasedReservation>> {
+        if (errors.hasFieldErrors()) {
+            val message = errors.fieldErrors.joinToString(separator = " ") {
+                "Field '${it.field}': ${it.defaultMessage}, got '${it.rejectedValue}' instead."
+            }
+            return ResponseEntity.badRequest().body(MyResponse.error(VALIDATION_FAILURE, message))
+        }
+
+        val result = service.finishPurchase(purchaseRequest.shoppingCartId)
         return ResponseEntity.ok(result.toResponse())
     }
 

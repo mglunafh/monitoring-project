@@ -136,11 +136,31 @@ class WarehouseDao(private val jdbcTemplate: NamedParameterJdbcTemplate) {
 
         val baseJdbcTemplate = jdbcTemplate.jdbcTemplate
         baseJdbcTemplate.batchUpdate(
-            CancelReservationUpdater.CANCEL_ITEM_RESERVATION,
-            CancelReservationUpdater(shoppingCartId, cancelTime, itemsReserved))
+            ProcessReservationUpdater.UPDATE_ITEM_RESERVATION,
+            ProcessReservationUpdater(shoppingCartId, cancelTime, itemsReserved, CANCELLED))
         baseJdbcTemplate.batchUpdate(
             CancelReservationStoreUpdater.RESTORE_ITEM_AMOUNT_QUERY,
             CancelReservationStoreUpdater(itemsReserved))
+
+        return itemsReserved
+    }
+
+    fun purchaseReservation(shoppingCartId: String, purchaseTime: LocalDateTime): List<ReservationDetails> {
+        val itemsReserved = jdbcTemplate.query(
+            """
+                select shopping_cart_id,item_id,sum(amount) as amount from goods_reserve
+                    where status = 'RESERVED' and shopping_cart_id = :id
+                    group by shopping_cart_id,item_id
+            """.trimIndent(),
+            mapOf("id" to shoppingCartId),
+            RowMappers.ReservationDetailsRowMapper
+        )
+
+        if (itemsReserved.isEmpty()) return listOf()
+        jdbcTemplate.jdbcTemplate.batchUpdate(
+            ProcessReservationUpdater.UPDATE_ITEM_RESERVATION,
+            ProcessReservationUpdater(shoppingCartId, purchaseTime, itemsReserved, PAID)
+        )
 
         return itemsReserved
     }

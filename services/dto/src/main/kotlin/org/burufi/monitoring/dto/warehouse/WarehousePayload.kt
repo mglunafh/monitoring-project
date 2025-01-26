@@ -17,6 +17,13 @@ data class ContractInfo(val id: Int, val supplier: String, val signDate: LocalDa
 data class CancelledReservation(
     val shoppingCartId: String,
     val message: String,
-    val cancelTime: LocalDateTime,
-    val cancelledItems: List<CancelledReservationItemDto> = listOf()
+    val cancelTime: LocalDateTime? = null,
+    val items: List<ReservationItemDto> = listOf()
+) : WarehousePayload
+
+data class PurchasedReservation(
+    val shoppingCartId: String,
+    val message: String,
+    val purchaseTime: LocalDateTime? = null,
+    val items: List<ReservationItemDto> = listOf()
 ) : WarehousePayload

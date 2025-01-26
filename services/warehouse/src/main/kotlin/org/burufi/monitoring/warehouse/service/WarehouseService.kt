@@ -1,9 +1,10 @@
 package org.burufi.monitoring.warehouse.service
 
 import org.burufi.monitoring.dto.warehouse.CancelledReservation
-import org.burufi.monitoring.dto.warehouse.CancelledReservationItemDto
+import org.burufi.monitoring.dto.warehouse.ReservationItemDto
 import org.burufi.monitoring.dto.warehouse.ContractInfo
 import org.burufi.monitoring.dto.warehouse.GoodsItemDto
+import org.burufi.monitoring.dto.warehouse.PurchasedReservation
 import org.burufi.monitoring.dto.warehouse.RegisterContractRequest
 import org.burufi.monitoring.dto.warehouse.RegisteredContract
 import org.burufi.monitoring.dto.warehouse.ReserveItemRequest
@@ -70,19 +71,36 @@ class WarehouseService(private val dao: WarehouseDao) {
 
     @Transactional
     fun cancelReservation(shoppingCartId: String): CancelledReservation {
-        val reservationCancelled = dao.isReservationProcessed(shoppingCartId)
-        val cancelTime = LocalDateTime.now()
-        if (reservationCancelled) {
-            return CancelledReservation(shoppingCartId, "Reservation does not exist or has already been processed", cancelTime)
+        val reservationProcessed = dao.isReservationProcessed(shoppingCartId)
+        if (reservationProcessed) {
+            return CancelledReservation(shoppingCartId, "Reservation does not exist or has already been processed")
         }
 
+        val cancelTime = LocalDateTime.now()
         val cancelledItems = dao.cancelReservation(shoppingCartId, cancelTime)
 
         return CancelledReservation(
             shoppingCartId = shoppingCartId,
             message = "Reservation was successfully cancelled",
             cancelTime = cancelTime,
-            cancelledItems = cancelledItems.map { CancelledReservationItemDto(it.itemId, it.amount.n) }
+            items = cancelledItems.map { ReservationItemDto(it.itemId, it.amount.n) }
+        )
+    }
+
+    @Transactional
+    fun finishPurchase(shoppingCartId: String): PurchasedReservation {
+        val reservationProcessed = dao.isReservationProcessed(shoppingCartId)
+        if (reservationProcessed) {
+            return PurchasedReservation(shoppingCartId, "Reservation does not exist or has already been processed")
+        }
+        val purchaseTime = LocalDateTime.now()
+        val purchasedItems = dao.purchaseReservation(shoppingCartId, purchaseTime)
+
+        return PurchasedReservation(
+            shoppingCartId = shoppingCartId,
+            message = "Reservation was successfully purchased",
+            purchaseTime = purchaseTime,
+            items = purchasedItems.map { ReservationItemDto(it.itemId, it.amount.n) }
         )
     }
 }

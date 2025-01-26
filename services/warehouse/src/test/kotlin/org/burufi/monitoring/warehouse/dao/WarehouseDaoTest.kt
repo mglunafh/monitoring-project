@@ -200,7 +200,6 @@ class WarehouseDaoTest {
             .ignoringFields("id")
             .isEqualTo(listOf(TEST_ITEM.minusItems(1), MOCK_ITEM.minusItems(5)))
 
-
         val cancelledItems = dao.cancelReservation(shoppingCart, cancelTime)
 
         assertThat(cancelledItems).extracting("shoppingCartId", "itemId", "amount")
@@ -212,6 +211,36 @@ class WarehouseDaoTest {
             .usingRecursiveComparison()
             .ignoringFields("id")
             .isEqualTo(listOf(TEST_ITEM, MOCK_ITEM))
+    }
+
+    @Test
+    fun `Test purchase reservation`() {
+        val testId = save(TEST_ITEM)
+        val mockId = save(MOCK_ITEM)
+        val shoppingCart = "test-shopping-cart-id"
+        val reserveTime = LocalDateTime.now().minusMinutes(10).truncatedTo(ChronoUnit.SECONDS)
+        val purchaseTime = reserveTime.plusMinutes(1)
+        dao.reserveItem(shoppingCart, testId, 1, reserveTime)
+        dao.reserveItem(shoppingCart, mockId, 2, reserveTime)
+        dao.reserveItem(shoppingCart, mockId, 3, reserveTime)
+
+        val itemsAfterReservation = listOf(testId, mockId).map { persistedItem(it) }
+        assertThat(itemsAfterReservation)
+            .usingRecursiveComparison()
+            .ignoringFields("id")
+            .isEqualTo(listOf(TEST_ITEM.minusItems(1), MOCK_ITEM.minusItems(5)))
+
+        val purchasedItems = dao.purchaseReservation(shoppingCart, purchaseTime)
+
+        assertThat(purchasedItems).extracting("shoppingCartId", "itemId", "amount")
+            .containsExactly(tuple(shoppingCart, testId, 1), tuple(shoppingCart, mockId, 5))
+        assertThat(dao.isReservationProcessed(shoppingCart)).isTrue
+
+        val itemsAfterPurchase = listOf(testId, mockId).map { persistedItem(it) }
+        assertThat(itemsAfterPurchase)
+            .usingRecursiveComparison()
+            .ignoringFields("id")
+            .isEqualTo(itemsAfterReservation)
     }
 
     private fun save(supplier: Supplier): Int {

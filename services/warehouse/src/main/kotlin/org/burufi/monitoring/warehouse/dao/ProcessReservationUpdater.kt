@@ -7,14 +7,15 @@ import java.sql.PreparedStatement
 import java.sql.Timestamp
 import java.time.LocalDateTime
 
-data class CancelReservationUpdater(
+data class ProcessReservationUpdater(
     val shoppingCartId: String,
     val cancelDate: LocalDateTime,
-    val reservations: List<ReservationDetails>
+    val reservations: List<ReservationDetails>,
+    val status: ReserveStatus
 ) : BatchPreparedStatementSetter {
 
     companion object {
-        const val CANCEL_ITEM_RESERVATION = """
+        const val UPDATE_ITEM_RESERVATION = """
             insert into goods_reserve(shopping_cart_id, item_id, amount, action_time, status) values (?, ?, ?, ?, ?)
         """
     }
@@ -25,7 +26,7 @@ data class CancelReservationUpdater(
         ps.setInt(2, reservation.itemId)
         ps.setInt(3, reservation.amount.n)
         ps.setTimestamp(4, Timestamp.valueOf(cancelDate))
-        ps.setString(5, ReserveStatus.CANCELLED.name)
+        ps.setString(5, status.name)
     }
 
     override fun getBatchSize() = reservations.size
