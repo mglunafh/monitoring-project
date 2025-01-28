@@ -1,15 +1,20 @@
 package org.burufi.monitoring.warehouse.service
 
 import org.burufi.monitoring.dto.warehouse.CancelledReservation
-import org.burufi.monitoring.dto.warehouse.ReservationItemDto
 import org.burufi.monitoring.dto.warehouse.ContractInfo
 import org.burufi.monitoring.dto.warehouse.GoodsItemDto
 import org.burufi.monitoring.dto.warehouse.PurchasedReservation
 import org.burufi.monitoring.dto.warehouse.RegisterContractRequest
 import org.burufi.monitoring.dto.warehouse.RegisteredContract
+import org.burufi.monitoring.dto.warehouse.ReservationInfo
+import org.burufi.monitoring.dto.warehouse.ReservationItemDto
+import org.burufi.monitoring.dto.warehouse.ReservationItemInfoDto
 import org.burufi.monitoring.dto.warehouse.ReserveItemRequest
 import org.burufi.monitoring.dto.warehouse.SupplierDto
 import org.burufi.monitoring.warehouse.dao.WarehouseDao
+import org.burufi.monitoring.warehouse.dao.record.ReserveStatus.CANCELLED
+import org.burufi.monitoring.warehouse.dao.record.ReserveStatus.PAID
+import org.burufi.monitoring.warehouse.dao.record.ReserveStatus.RESERVED
 import org.burufi.monitoring.warehouse.exception.FailureType
 import org.burufi.monitoring.warehouse.exception.WarehouseException
 import org.burufi.monitoring.warehouse.mapper.WarehouseMapper
@@ -120,6 +125,37 @@ class WarehouseService(private val dao: WarehouseDao) {
             message = "Reservation was successfully purchased",
             purchaseTime = purchaseTime,
             items = purchasedItems.map { ReservationItemDto(it.itemId, it.amount.n) }
+        )
+    }
+
+    @Transactional
+    fun getReservationInfo(shoppingCartId: String): ReservationInfo? {
+        val items = dao.getReservationInfo(shoppingCartId)
+        if (items.isEmpty()) return null
+
+        val statuses = items.map { it.status }.distinct()
+        val reservationStatus = when {
+            PAID in statuses && CANCELLED in statuses ->
+                throw IllegalArgumentException("Reservation '$shoppingCartId' is malformed, it has both final statuses.")
+            PAID in statuses -> PAID
+            CANCELLED in statuses -> CANCELLED
+            else -> RESERVED
+        }
+        val firstReserved   = items.filter { it.status == RESERVED }.minOf { it.firstModified }
+        val lastReserved    = items.filter { it.status == RESERVED }.maxOf { it.lastModified }
+        val cancelTime      = items.filter { it.status == CANCELLED }.maxOfOrNull { it.lastModified }
+        val purchaseTime    = items.filter { it.status == PAID }.maxOfOrNull { it.lastModified }
+
+        return ReservationInfo(
+            shoppingCartId = shoppingCartId,
+            status = reservationStatus.name,
+            firstReserved = firstReserved,
+            lastReserved = lastReserved,
+            cancelTime = cancelTime,
+            purchaseTime = purchaseTime,
+            items = items
+                .filter { it.status == RESERVED }
+                .map { ReservationItemInfoDto(it.itemId, it.amount.n, it.firstModified, it.lastModified) }
         )
     }
 }

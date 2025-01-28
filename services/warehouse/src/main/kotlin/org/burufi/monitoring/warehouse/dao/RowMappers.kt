@@ -5,6 +5,7 @@ import org.burufi.monitoring.warehouse.dao.record.Amount
 import org.burufi.monitoring.warehouse.dao.record.GoodsItem
 import org.burufi.monitoring.warehouse.dao.record.ItemType
 import org.burufi.monitoring.warehouse.dao.record.ReservationDetails
+import org.burufi.monitoring.warehouse.dao.record.ReservationFullDetails
 import org.burufi.monitoring.warehouse.dao.record.ReservationSummary
 import org.burufi.monitoring.warehouse.dao.record.ReserveStatus
 import org.burufi.monitoring.warehouse.dao.record.Supplier
@@ -92,6 +93,21 @@ object RowMappers {
             val itemId = rs.getInt("item_id")
             val amount = Amount(rs.getInt("amount"))
             return ReservationDetails(shoppingCartId, itemId, amount)
+        }
+    }
+
+    /**
+     * Extracts the detailed information about the list of items reserved with the given shopping cart ID.
+     */
+    object ReservationFullDetailsRowMapper : RowMapper<ReservationFullDetails> {
+        override fun mapRow(rs: ResultSet, rowNum: Int): ReservationFullDetails {
+            val id = rs.getInt("item_id")
+            val amount = Amount(rs.getInt("amount"))
+            val firstModified = rs.getTimestamp("first_modified")
+            val lastModified = rs.getTimestamp("last_modified")
+            val status = ReserveStatus.valueOf(rs.getString("status"))
+
+            return ReservationFullDetails(id, amount, firstModified.toLocalDateTime(), lastModified.toLocalDateTime(), status)
         }
     }
 }

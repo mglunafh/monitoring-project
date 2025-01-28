@@ -6,6 +6,7 @@ import org.burufi.monitoring.dto.warehouse.ContractItemOrderDto
 import org.burufi.monitoring.warehouse.dao.record.Amount
 import org.burufi.monitoring.warehouse.dao.record.GoodsItem
 import org.burufi.monitoring.warehouse.dao.record.ItemType
+import org.burufi.monitoring.warehouse.dao.record.ReserveStatus
 import org.burufi.monitoring.warehouse.dao.record.Supplier
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -203,29 +204,68 @@ class WarehouseDaoTest {
     }
 
     @Test
+    fun `Test non-existent reservation info`() {
+        val result = dao.getReservationInfo("test-shopping-cart")
+        assertThat(result).isEmpty()
+    }
+
+    @Test
+    fun `Test reservation info`() {
+        val testId = save(TEST_ITEM)
+        val mockId = save(MOCK_ITEM)
+        val shoppingCart = "test-shopping-cart-id"
+        val reserveTime = LocalDateTime.now().minusMinutes(10).truncatedTo(ChronoUnit.SECONDS)
+        dao.reserveItem(shoppingCart, testId, 1, reserveTime)
+        dao.reserveItem(shoppingCart, mockId, 2, reserveTime.plusMinutes(1))
+        dao.reserveItem(shoppingCart, mockId, 3, reserveTime.plusMinutes(2))
+        dao.reserveItem(shoppingCart, testId, 1, reserveTime.plusMinutes(3))
+
+        val result = dao.getReservationInfo(shoppingCart)
+
+        assertThat(result).extracting("itemId", "amount", "firstModified", "lastModified", "status")
+            .containsExactlyInAnyOrder(
+                tuple(testId, 2, reserveTime, reserveTime.plusMinutes(3), ReserveStatus.RESERVED),
+                tuple(mockId, 5, reserveTime.plusMinutes(1), reserveTime.plusMinutes(2), ReserveStatus.RESERVED)
+            )
+
+        val cancelTime = reserveTime.plusMinutes(5)
+        dao.cancelReservation(shoppingCart, cancelTime)
+    }
+
+    @Test
     fun `Test cancel reservation`() {
         val testId = save(TEST_ITEM)
         val mockId = save(MOCK_ITEM)
         val shoppingCart = "test-shopping-cart-id"
         val reserveTime = LocalDateTime.now().minusMinutes(10).truncatedTo(ChronoUnit.SECONDS)
-        val cancelTime = reserveTime.plusMinutes(1)
         dao.reserveItem(shoppingCart, testId, 1, reserveTime)
-        dao.reserveItem(shoppingCart, mockId, 2, reserveTime)
-        dao.reserveItem(shoppingCart, mockId, 3, reserveTime)
+        dao.reserveItem(shoppingCart, mockId, 2, reserveTime.plusMinutes(1))
+        dao.reserveItem(shoppingCart, mockId, 3, reserveTime.plusMinutes(2))
+        dao.reserveItem(shoppingCart, testId, 1, reserveTime.plusMinutes(3))
 
         val itemsAfterReservation = listOf(testId, mockId).map { persistedItem(it) }
         assertThat(itemsAfterReservation).usingRecursiveComparison().ignoringFields("id")
-            .isEqualTo(listOf(TEST_ITEM.minusItems(1), MOCK_ITEM.minusItems(5)))
+            .isEqualTo(listOf(TEST_ITEM.minusItems(2), MOCK_ITEM.minusItems(5)))
 
+        val cancelTime = reserveTime.plusMinutes(5)
         val cancelledItems = dao.cancelReservation(shoppingCart, cancelTime)
 
         assertThat(cancelledItems).extracting("shoppingCartId", "itemId", "amount")
-            .containsExactly(tuple(shoppingCart, testId, 1), tuple(shoppingCart, mockId, 5))
+            .containsExactly(tuple(shoppingCart, testId, 2), tuple(shoppingCart, mockId, 5))
         assertThat(dao.isReservationProcessed(shoppingCart)).isTrue
 
         val itemsAfterCancellation = listOf(testId, mockId).map { persistedItem(it) }
         assertThat(itemsAfterCancellation).usingRecursiveComparison().ignoringFields("id")
             .isEqualTo(listOf(TEST_ITEM, MOCK_ITEM))
+
+        val reservationInfo = dao.getReservationInfo(shoppingCart)
+        assertThat(reservationInfo).extracting("itemId", "amount", "firstModified", "lastModified", "status")
+            .containsExactlyInAnyOrder(
+                tuple(testId, 2, reserveTime, reserveTime.plusMinutes(3), ReserveStatus.RESERVED),
+                tuple(testId, 2, cancelTime, cancelTime, ReserveStatus.CANCELLED),
+                tuple(mockId, 5, reserveTime.plusMinutes(1), reserveTime.plusMinutes(2), ReserveStatus.RESERVED),
+                tuple(mockId, 5, cancelTime, cancelTime, ReserveStatus.CANCELLED)
+            )
     }
 
     @Test
@@ -234,24 +274,34 @@ class WarehouseDaoTest {
         val mockId = save(MOCK_ITEM)
         val shoppingCart = "test-shopping-cart-id"
         val reserveTime = LocalDateTime.now().minusMinutes(10).truncatedTo(ChronoUnit.SECONDS)
-        val purchaseTime = reserveTime.plusMinutes(1)
         dao.reserveItem(shoppingCart, testId, 1, reserveTime)
-        dao.reserveItem(shoppingCart, mockId, 2, reserveTime)
-        dao.reserveItem(shoppingCart, mockId, 3, reserveTime)
+        dao.reserveItem(shoppingCart, mockId, 2, reserveTime.plusMinutes(1))
+        dao.reserveItem(shoppingCart, mockId, 3, reserveTime.plusMinutes(2))
+        dao.reserveItem(shoppingCart, testId, 1, reserveTime.plusMinutes(3))
 
         val itemsAfterReservation = listOf(testId, mockId).map { persistedItem(it) }
         assertThat(itemsAfterReservation).usingRecursiveComparison().ignoringFields("id")
-            .isEqualTo(listOf(TEST_ITEM.minusItems(1), MOCK_ITEM.minusItems(5)))
+            .isEqualTo(listOf(TEST_ITEM.minusItems(2), MOCK_ITEM.minusItems(5)))
 
+        val purchaseTime = reserveTime.plusMinutes(5)
         val purchasedItems = dao.purchaseReservation(shoppingCart, purchaseTime)
 
         assertThat(purchasedItems).extracting("shoppingCartId", "itemId", "amount")
-            .containsExactly(tuple(shoppingCart, testId, 1), tuple(shoppingCart, mockId, 5))
+            .containsExactly(tuple(shoppingCart, testId, 2), tuple(shoppingCart, mockId, 5))
         assertThat(dao.isReservationProcessed(shoppingCart)).isTrue
 
         val itemsAfterPurchase = listOf(testId, mockId).map { persistedItem(it) }
         assertThat(itemsAfterPurchase).usingRecursiveComparison().ignoringFields("id")
             .isEqualTo(itemsAfterReservation)
+
+        val reservationInfo = dao.getReservationInfo(shoppingCart)
+        assertThat(reservationInfo).extracting("itemId", "amount", "firstModified", "lastModified", "status")
+            .containsExactlyInAnyOrder(
+                tuple(testId, 2, reserveTime, reserveTime.plusMinutes(3), ReserveStatus.RESERVED),
+                tuple(testId, 2, purchaseTime, purchaseTime, ReserveStatus.PAID),
+                tuple(mockId, 5, reserveTime.plusMinutes(1), reserveTime.plusMinutes(2), ReserveStatus.RESERVED),
+                tuple(mockId, 5, purchaseTime, purchaseTime, ReserveStatus.PAID)
+            )
     }
 
     private fun save(supplier: Supplier): Int {

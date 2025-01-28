@@ -6,6 +6,8 @@ import org.burufi.monitoring.dto.warehouse.ContractInfo
 import org.burufi.monitoring.dto.warehouse.GoodsItemDto
 import org.burufi.monitoring.dto.warehouse.PurchasedReservation
 import org.burufi.monitoring.dto.warehouse.RegisteredContract
+import org.burufi.monitoring.dto.warehouse.ReservationInfo
+import org.burufi.monitoring.dto.warehouse.ReservationItemInfoDto
 import org.burufi.monitoring.dto.warehouse.SupplierDto
 import org.burufi.monitoring.warehouse.exception.FailureType
 import org.burufi.monitoring.warehouse.exception.WarehouseException
@@ -236,6 +238,63 @@ class WarehouseControllerTest {
             .andExpect(MockMvcResultMatchers.status().isInternalServerError)
             .andExpect(MockMvcResultMatchers.jsonPath("$.responseCode").value("INTERNAL_SERVER_ERROR"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value(WarehouseExceptionHandler.TOO_FEW_ITEMS_CURRENTLY))
+    }
+
+    @Test
+    fun `Test retrieve non-existent reservation info`() {
+        val shoppingCart = "test-shopping-cart"
+        doReturn(null).`when`(warehouseService).getReservationInfo(shoppingCart)
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/warehouse/reserve/$shoppingCart")
+            .accept(APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.status().isNotFound)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.responseCode").value("NOT_FOUND"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value(
+                StringContains.containsString("Shopping cart with ID '$shoppingCart' is not found")))
+    }
+
+    @Test
+    fun `Test reservation info`() {
+        val shoppingCart = "test-shopping-cart"
+        val firstReserved   = LocalDateTime.of(2020, 1, 10, 10, 30, 0)
+        val lastReserved    = LocalDateTime.of(2020, 1, 10, 10, 31, 0)
+        val paid            = LocalDateTime.of(2020, 1, 10, 10, 32, 0)
+        val firstModified = "2020-01-10T10:30:00"
+        val lastModified = "2020-01-10T10:31:00"
+
+        val reservationInfo = ReservationInfo(
+            shoppingCartId = shoppingCart,
+            status = "PAID",
+            firstReserved = firstReserved,
+            lastReserved = lastReserved,
+            cancelTime = null,
+            purchaseTime = paid,
+            items = listOf(
+                ReservationItemInfoDto(1, 2, firstReserved, firstReserved),
+                ReservationItemInfoDto(2, 5, lastReserved, lastReserved)
+            )
+        )
+        doReturn(reservationInfo).`when`(warehouseService).getReservationInfo(shoppingCart)
+
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/warehouse/reserve/$shoppingCart")
+            .accept(APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.responseCode").value("OK"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.payload.shoppingCartId").value(shoppingCart))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.payload.status").value("PAID"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.payload.firstReserved").value(firstModified))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.payload.lastReserved").value(lastModified))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.payload.cancelTime").isEmpty)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.payload.purchaseTime").value("2020-01-10T10:32:00"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.payload.items[0].id").value(1))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.payload.items[0].amount").value(2))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.payload.items[0].firstModified").value(firstModified))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.payload.items[0].lastModified").value(firstModified))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.payload.items[1].id").value(2))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.payload.items[1].amount").value(5))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.payload.items[1].firstModified").value(lastModified))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.payload.items[1].lastModified").value(lastModified))
     }
 
     @Test

@@ -27,3 +27,13 @@ data class PurchasedReservation(
     val purchaseTime: LocalDateTime? = null,
     val items: List<ReservationItemDto> = listOf()
 ) : WarehousePayload
+
+data class ReservationInfo(
+    val shoppingCartId: String,
+    val status: String,
+    val firstReserved: LocalDateTime,
+    val lastReserved: LocalDateTime,
+    val cancelTime: LocalDateTime?,
+    val purchaseTime: LocalDateTime?,
+    val items: List<ReservationItemInfoDto>
+) : WarehousePayload

@@ -14,6 +14,7 @@ import org.burufi.monitoring.dto.warehouse.ListSuppliers
 import org.burufi.monitoring.dto.warehouse.PurchasedReservation
 import org.burufi.monitoring.dto.warehouse.RegisterContractRequest
 import org.burufi.monitoring.dto.warehouse.RegisteredContract
+import org.burufi.monitoring.dto.warehouse.ReservationInfo
 import org.burufi.monitoring.dto.warehouse.ReserveItemRequest
 import org.burufi.monitoring.warehouse.service.WarehouseService
 import org.springframework.http.HttpStatusCode
@@ -98,6 +99,18 @@ class WarehouseController(private val service: WarehouseService) {
         }
 
         return ResponseEntity.ok(MyResponse(ResponseCode.OK, null, null))
+    }
+
+    @GetMapping("/reserve/{id}")
+    fun reservationInfo(@PathVariable("id") shoppingCartId: String): ResponseEntity<MyResponse<ReservationInfo>> {
+        val reservation = service.getReservationInfo(shoppingCartId)
+
+        return if (reservation == null) {
+            val body = MyResponse.error<ReservationInfo>(ResponseCode.NOT_FOUND, "Shopping cart with ID '$shoppingCartId' is not found")
+            ResponseEntity.status(HttpStatusCode.valueOf(404)).body(body)
+        } else {
+            ResponseEntity.ok().body(reservation.toResponse())
+        }
     }
 
     @PostMapping("/reserve/cancel")

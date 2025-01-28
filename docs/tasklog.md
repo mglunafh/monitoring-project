@@ -8,14 +8,14 @@
   - `IPMN-18` -- add tracing to 'Deliveries'
   - `IPMN-21` -- deploy grafana with dashboards (https://stackoverflow.com/questions/63518460/grafana-import-dashboard-as-part-of-docker-compose)
 - `IPMN-20` -- implement 'Warehouse' app
-  - `IPMN-32` -- add 'Get shopping cart info' endpoint (id, status, last_reserve_time, cancel_time, purchase_time, items[])
-  - after `IPMN-30`, `IPMN-31`, `IPMN-32` the app may be added to the monitoring harness 
+  - `IPMN-33` -- validation constraints on shopping cart id
 - `IPMN-26` -- think about extracting exceptions into a separate module 
 
 ---------
 
 ### Done
 
+- `IPMN-32` -- add 'Get shopping cart info' endpoint
 - `IPMN-30` -- Incorporated PSQLException data into database error processing
 - `IPMN-31` -- add 'Buy out shopping cart' endpoint
 - `IPMN-29` -- add 'Cancel shopping cart' endpoint

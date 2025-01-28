@@ -4,6 +4,7 @@ import org.burufi.monitoring.dto.warehouse.ContractInfo
 import org.burufi.monitoring.dto.warehouse.ContractItemOrderDto
 import org.burufi.monitoring.warehouse.dao.record.GoodsItem
 import org.burufi.monitoring.warehouse.dao.record.ReservationDetails
+import org.burufi.monitoring.warehouse.dao.record.ReservationFullDetails
 import org.burufi.monitoring.warehouse.dao.record.ReserveStatus
 import org.burufi.monitoring.warehouse.dao.record.ReserveStatus.CANCELLED
 import org.burufi.monitoring.warehouse.dao.record.ReserveStatus.PAID
@@ -110,9 +111,9 @@ class WarehouseDao(private val jdbcTemplate: NamedParameterJdbcTemplate) {
     fun cancelReservation(shoppingCartId: String, cancelTime: LocalDateTime): List<ReservationDetails> {
         val itemsReserved = jdbcTemplate.query(
             """
-                select shopping_cart_id,item_id,sum(amount) as amount from goods_reserve
-                    where status = 'RESERVED' and shopping_cart_id = :id
-                    group by shopping_cart_id,item_id
+                SELECT shopping_cart_id, item_id, SUM(amount) as amount FROM goods_reserve
+                    WHERE status = 'RESERVED' AND shopping_cart_id = :id
+                    GROUP BY shopping_cart_id, item_id
             """.trimIndent(),
             mapOf("id" to shoppingCartId),
             RowMappers.ReservationDetailsRowMapper
@@ -134,9 +135,9 @@ class WarehouseDao(private val jdbcTemplate: NamedParameterJdbcTemplate) {
     fun purchaseReservation(shoppingCartId: String, purchaseTime: LocalDateTime): List<ReservationDetails> {
         val itemsReserved = jdbcTemplate.query(
             """
-                select shopping_cart_id,item_id,sum(amount) as amount from goods_reserve
-                    where status = 'RESERVED' and shopping_cart_id = :id
-                    group by shopping_cart_id,item_id
+                SELECT shopping_cart_id, item_id, SUM(amount) as amount FROM goods_reserve
+                    WHERE status = 'RESERVED' AND shopping_cart_id = :id
+                    GROUP BY shopping_cart_id, item_id
             """.trimIndent(),
             mapOf("id" to shoppingCartId),
             RowMappers.ReservationDetailsRowMapper
@@ -149,5 +150,19 @@ class WarehouseDao(private val jdbcTemplate: NamedParameterJdbcTemplate) {
         )
 
         return itemsReserved
+    }
+
+    fun getReservationInfo(shoppingCartId: String): List<ReservationFullDetails> {
+        return jdbcTemplate.query(
+            """
+                SELECT item_id, SUM(amount) as amount, MIN(action_time) as first_modified, MAX(action_time) as last_modified, status
+                    FROM goods_reserve
+                    WHERE shopping_cart_id = :id
+                    GROUP BY item_id, status
+                    ORDER BY status, item_id;
+            """.trimIndent(),
+            mapOf("id" to shoppingCartId),
+            RowMappers.ReservationFullDetailsRowMapper
+        )
     }
 }
