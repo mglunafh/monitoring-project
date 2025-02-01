@@ -60,7 +60,22 @@ class DeliveryControllerTest {
             .accept(APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.status().isBadRequest)
             .andExpect(MockMvcResultMatchers.jsonPath("$.responseCode").value("VALIDATION_FAILURE"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value("Shopping Cart ID must not be blank"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value("Invalid shopping cart ID format"))
+    }
+
+    @Test
+    fun `test create order, malformed shopping cart ID`() {
+        val badRequest = """
+            {"shoppingCartId": "test-shopping-cart_id", "transportMark": "$GAZELLE_MARK", "distance": 150 }
+        """.trimIndent()
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/delivery")
+            .content(badRequest)
+            .contentType(APPLICATION_JSON)
+            .accept(APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.status().isBadRequest)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.responseCode").value("VALIDATION_FAILURE"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value("Invalid shopping cart ID format"))
     }
 
     @Test

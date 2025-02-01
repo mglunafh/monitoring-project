@@ -5,12 +5,13 @@ import org.burufi.monitoring.dto.MyResponse
 import org.burufi.monitoring.dto.MyResponse.Companion.toResponse
 import org.burufi.monitoring.dto.ResponseCode
 import org.burufi.monitoring.dto.ResponseCode.VALIDATION_FAILURE
+import org.burufi.monitoring.dto.ShoppingCartId
 import org.burufi.monitoring.dto.warehouse.CancelledReservation
-import org.burufi.monitoring.dto.warehouse.ProcessReserveRequest
 import org.burufi.monitoring.dto.warehouse.ContractInfo
 import org.burufi.monitoring.dto.warehouse.ContractItemOrderDto
 import org.burufi.monitoring.dto.warehouse.ListGoods
 import org.burufi.monitoring.dto.warehouse.ListSuppliers
+import org.burufi.monitoring.dto.warehouse.ProcessReserveRequest
 import org.burufi.monitoring.dto.warehouse.PurchasedReservation
 import org.burufi.monitoring.dto.warehouse.RegisterContractRequest
 import org.burufi.monitoring.dto.warehouse.RegisteredContract
@@ -21,12 +22,14 @@ import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.Errors
+import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.method.annotation.HandlerMethodValidationException
 
 @RestController
 @RequestMapping("/warehouse")
@@ -102,9 +105,10 @@ class WarehouseController(private val service: WarehouseService) {
     }
 
     @GetMapping("/reserve/{id}")
-    fun reservationInfo(@PathVariable("id") shoppingCartId: String): ResponseEntity<MyResponse<ReservationInfo>> {
+    fun reservationInfo(
+        @PathVariable("id") @ShoppingCartId shoppingCartId: String
+    ): ResponseEntity<MyResponse<ReservationInfo>> {
         val reservation = service.getReservationInfo(shoppingCartId)
-
         return if (reservation == null) {
             val body = MyResponse.error<ReservationInfo>(ResponseCode.NOT_FOUND, "Shopping cart with ID '$shoppingCartId' is not found")
             ResponseEntity.status(HttpStatusCode.valueOf(404)).body(body)
@@ -143,6 +147,18 @@ class WarehouseController(private val service: WarehouseService) {
 
         val result = service.finishPurchase(purchaseRequest.shoppingCartId)
         return ResponseEntity.ok(result.toResponse())
+    }
+
+    @ExceptionHandler(HandlerMethodValidationException::class)
+    fun methodValidationFailure(ex: HandlerMethodValidationException): ResponseEntity<MyResponse<Nothing>> {
+        val validationFailureReport = ex.parameterValidationResults.joinToString(separator = " ") {
+            val methodParam = it.methodParameter
+            val methodArgument = it.argument
+            val messageErrors = it.resolvableErrors.joinToString(separator = "; ") { it.defaultMessage ?: "" }
+            "$methodParam, '$methodArgument' has caused problems: $messageErrors."
+        }
+
+        return ResponseEntity.badRequest().body(MyResponse.error(VALIDATION_FAILURE, validationFailureReport))
     }
 
     private fun duplicateIds(items: List<ContractItemOrderDto>): Set<Int> {

@@ -1,8 +1,8 @@
 package org.burufi.monitoring.dto.warehouse
 
-import jakarta.validation.constraints.NotBlank
+import org.burufi.monitoring.dto.ShoppingCartId
 
 data class ProcessReserveRequest(
-    @field:NotBlank("ShoppingCart ID must not be blank")
+    @field:ShoppingCartId
     val shoppingCartId: String
 )

@@ -177,7 +177,22 @@ class WarehouseControllerTest {
             .andExpect(MockMvcResultMatchers.status().isBadRequest)
             .andExpect(MockMvcResultMatchers.jsonPath("$.responseCode").value("VALIDATION_FAILURE"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value(
-                StringContains.containsString("Field 'shoppingCartId': ShoppingCart ID must not be blank, got ' ' instead")
+                StringContains.containsString("Field 'shoppingCartId': Invalid shopping cart ID format, got ' ' instead")
+            ))
+    }
+
+    @Test
+    fun `Test reserve for a malformed shopping cart ID`() {
+        val badRequest = """{ "shoppingCartId": "test-shopping-cart_1", "itemId": 10, "amount": 10 }"""
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/warehouse/reserve")
+            .content(badRequest)
+            .contentType(APPLICATION_JSON)
+            .accept(APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.status().isBadRequest)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.responseCode").value("VALIDATION_FAILURE"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value(
+                StringContains.containsString("Invalid shopping cart ID format")
             ))
     }
 
@@ -254,6 +269,19 @@ class WarehouseControllerTest {
     }
 
     @Test
+    fun `Test reservation info on malformed ID`() {
+        val shoppingCart = "test-shopping-cart_1"
+        doReturn(null).`when`(warehouseService).getReservationInfo(shoppingCart)
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/warehouse/reserve/$shoppingCart")
+            .accept(APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.status().isBadRequest)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.responseCode").value("VALIDATION_FAILURE"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value(
+                StringContains.containsString("Invalid shopping cart ID format")))
+    }
+
+    @Test
     fun `Test reservation info`() {
         val shoppingCart = "test-shopping-cart"
         val firstReserved   = LocalDateTime.of(2020, 1, 10, 10, 30, 0)
@@ -275,7 +303,6 @@ class WarehouseControllerTest {
             )
         )
         doReturn(reservationInfo).`when`(warehouseService).getReservationInfo(shoppingCart)
-
 
         mockMvc.perform(MockMvcRequestBuilders.get("/warehouse/reserve/$shoppingCart")
             .accept(APPLICATION_JSON))
@@ -308,7 +335,22 @@ class WarehouseControllerTest {
             .andExpect(MockMvcResultMatchers.status().isBadRequest)
             .andExpect(MockMvcResultMatchers.jsonPath("$.responseCode").value("VALIDATION_FAILURE"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value(
-                StringContains.containsString("Field 'shoppingCartId': ShoppingCart ID must not be blank, got '  ' instead")
+                StringContains.containsString("Field 'shoppingCartId': Invalid shopping cart ID format")
+            ))
+    }
+
+    @Test
+    fun `Test cancel reservation for malformed shopping cart ID`() {
+        val badRequest = """{ "shoppingCartId": "test-shopping-cart_1" }"""
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/warehouse/reserve/cancel")
+            .content(badRequest)
+            .contentType(APPLICATION_JSON)
+            .accept(APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.status().isBadRequest)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.responseCode").value("VALIDATION_FAILURE"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value(
+                StringContains.containsString("Field 'shoppingCartId': Invalid shopping cart ID format")
             ))
     }
 
@@ -345,7 +387,22 @@ class WarehouseControllerTest {
             .andExpect(MockMvcResultMatchers.status().isBadRequest)
             .andExpect(MockMvcResultMatchers.jsonPath("$.responseCode").value("VALIDATION_FAILURE"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value(
-                StringContains.containsString("Field 'shoppingCartId': ShoppingCart ID must not be blank, got '  ' instead")
+                StringContains.containsString("Invalid shopping cart ID format")
+            ))
+    }
+
+    @Test
+    fun `Test purchase reservation for malformed shopping cart ID`() {
+        val badRequest = """{ "shoppingCartId": "test+shopping-cart-1" }"""
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/warehouse/reserve/purchase")
+            .content(badRequest)
+            .contentType(APPLICATION_JSON)
+            .accept(APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.status().isBadRequest)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.responseCode").value("VALIDATION_FAILURE"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value(
+                StringContains.containsString("Field 'shoppingCartId': Invalid shopping cart ID format")
             ))
     }
 

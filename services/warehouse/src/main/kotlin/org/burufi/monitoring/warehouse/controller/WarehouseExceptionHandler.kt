@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.web.servlet.resource.NoResourceFoundException
 
 @RestControllerAdvice
 class WarehouseExceptionHandler {
@@ -50,7 +51,12 @@ class WarehouseExceptionHandler {
     @ExceptionHandler
     fun internalServerError(ex: Exception): ResponseEntity<MyResponse<*>> {
         log.error("Encountered error during request processing", ex)
-        return ResponseEntity.internalServerError().body(
-            MyResponse.error<Nothing>(INTERNAL_SERVER_ERROR, UNEXPECTED_SERVER_ERROR))
+        return when {
+            ex is NoResourceFoundException -> ResponseEntity.status(404).body(
+                MyResponse.error<Nothing>(ResponseCode.NOT_FOUND, ex.message ?: "")
+            )
+            else -> ResponseEntity.internalServerError().body(
+                MyResponse.error<Nothing>(INTERNAL_SERVER_ERROR, UNEXPECTED_SERVER_ERROR))
+        }
     }
 }
