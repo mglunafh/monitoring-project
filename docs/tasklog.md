@@ -7,13 +7,13 @@
   - `IPMN-17` -- add logging to 'Deliveries'
   - `IPMN-18` -- add tracing to 'Deliveries'
   - `IPMN-21` -- deploy grafana with dashboards (https://stackoverflow.com/questions/63518460/grafana-import-dashboard-as-part-of-docker-compose)
-- `IPMN-20` -- implement 'Warehouse' app
 - `IPMN-26` -- think about extracting exceptions into a separate module 
 
 ---------
 
 ### Done
 
+- `IPMN-20` -- implement 'Warehouse' app
 - `IPMN-34` -- warehouse integration test
 - `IPMN-33` -- validation constraints on shopping cart id
 - `IPMN-32` -- add 'Get shopping cart info' endpoint
