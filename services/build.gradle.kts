@@ -8,7 +8,7 @@ plugins {
 
 subprojects {
     group = "org.burufi.monitoring"
-    version = "0.2"
+    version = "0.3"
 
     apply(plugin = "org.jetbrains.kotlin.jvm")
     apply(plugin = "org.springframework.boot")

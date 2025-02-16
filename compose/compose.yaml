@@ -26,7 +26,7 @@ services:
       - ./db-delivery-init:/docker-entrypoint-initdb.d
 
   warehouse:
-    image: monitoring-warehouse:0.2
+    image: monitoring-warehouse:0.3
     container_name: srv-warehouse
     cpus: 1.5
     mem_limit: 750m
@@ -41,7 +41,7 @@ services:
       - db-warehouse
 
   delivery:
-    image: monitoring-delivery:0.2
+    image: monitoring-delivery:0.3
     container_name: srv-delivery
     cpus: 1.5
     mem_limit: 750m
