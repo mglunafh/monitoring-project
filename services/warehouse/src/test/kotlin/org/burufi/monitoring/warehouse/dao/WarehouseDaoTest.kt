@@ -3,6 +3,8 @@ package org.burufi.monitoring.warehouse.dao
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.tuple
 import org.burufi.monitoring.dto.warehouse.ContractItemOrderDto
+import org.burufi.monitoring.warehouse.Utils.persistedItem
+import org.burufi.monitoring.warehouse.Utils.save
 import org.burufi.monitoring.warehouse.dao.record.Amount
 import org.burufi.monitoring.warehouse.dao.record.GoodsItem
 import org.burufi.monitoring.warehouse.dao.record.ItemType
@@ -77,7 +79,7 @@ class WarehouseDaoTest {
     @Test
     fun `Test suppliers`() {
         assertThat(dao.getSuppliersList()).isEmpty()
-        save(TEST_SUPPLIER)
+        jdbcTemplate.save(TEST_SUPPLIER)
 
         assertThat(dao.getSuppliersList()).usingRecursiveComparison().ignoringFields("id")
             .isEqualTo(listOf(TEST_SUPPLIER))
@@ -86,7 +88,7 @@ class WarehouseDaoTest {
     @Test
     fun `Test goods`() {
         assertThat(dao.getGoodsList()).isEmpty()
-        save(TEST_ITEM)
+        jdbcTemplate.save(TEST_ITEM)
 
         val goodsList = dao.getGoodsList()
         assertThat(goodsList).usingRecursiveComparison().ignoringFields("id")
@@ -95,7 +97,7 @@ class WarehouseDaoTest {
 
     @Test
     fun `Test supplier existence`() {
-        val id = save(TEST_SUPPLIER)
+        val id = jdbcTemplate.save(TEST_SUPPLIER)
 
         assertThat(dao.supplierExists(id)).isTrue
         assertThat(dao.supplierExists(id + 1)).isFalse
@@ -103,7 +105,7 @@ class WarehouseDaoTest {
 
     @Test
     fun `Test create contract`() {
-        val supplierId = save(TEST_SUPPLIER)
+        val supplierId = jdbcTemplate.save(TEST_SUPPLIER)
         val signDate = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
 
         val contractId = dao.createContract(supplierId, signDate, BigDecimal(50))
@@ -115,9 +117,9 @@ class WarehouseDaoTest {
 
     @Test
     fun `Test register contract items`() {
-        val supplierId = save(TEST_SUPPLIER)
-        val itemId1 = save(TEST_ITEM)
-        val itemId2 = save(MOCK_ITEM)
+        val supplierId = jdbcTemplate.save(TEST_SUPPLIER)
+        val itemId1 = jdbcTemplate.save(TEST_ITEM)
+        val itemId2 = jdbcTemplate.save(MOCK_ITEM)
         val signDate = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
         val contractId = dao.createContract(supplierId, signDate, BigDecimal(55))
 
@@ -135,8 +137,8 @@ class WarehouseDaoTest {
 
     @Test
     fun `Test register non-existent contract items`() {
-        val supplierId = save(TEST_SUPPLIER)
-        val itemId1 = save(TEST_ITEM)
+        val supplierId = jdbcTemplate.save(TEST_SUPPLIER)
+        val itemId1 = jdbcTemplate.save(TEST_ITEM)
         val signDate = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
         val contractId = dao.createContract(supplierId, signDate, BigDecimal(55))
         val contractItems = listOf(
@@ -157,7 +159,7 @@ class WarehouseDaoTest {
 
     @Test
     fun `Test item existence`() {
-        val id = save(TEST_ITEM)
+        val id = jdbcTemplate.save(TEST_ITEM)
 
         assertThat(dao.itemExists(id)).isTrue
         assertThat(dao.itemExists(id + 1)).isFalse
@@ -165,19 +167,19 @@ class WarehouseDaoTest {
 
     @Test
     fun `Test reserve item`() {
-        val id = save(TEST_ITEM)
+        val id = jdbcTemplate.save(TEST_ITEM)
         val shoppingCart = "test-shopping-cart-id"
         val reserveTime = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
         dao.reserveItem(shoppingCart, id, 1, reserveTime)
 
-        val itemInDB = persistedItem(id)
+        val itemInDB = jdbcTemplate.persistedItem(id)
         assertThat(itemInDB).usingRecursiveComparison().ignoringFields("id")
             .isEqualTo(TEST_ITEM.minusItems(1))
     }
 
     @Test
     fun `Test reserve too much`() {
-        val id = save(TEST_ITEM)
+        val id = jdbcTemplate.save(TEST_ITEM)
         val shoppingCart = "test-shopping-cart-id"
         val reserveTime = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
 
@@ -193,7 +195,7 @@ class WarehouseDaoTest {
 
     @Test
     fun `Test status of ongoing reservation`() {
-        val id = save(TEST_ITEM)
+        val id = jdbcTemplate.save(TEST_ITEM)
         val shoppingCart = "test-shopping-cart-id"
         val reserveTime = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
         dao.reserveItem(shoppingCart, id, 1, reserveTime)
@@ -211,8 +213,8 @@ class WarehouseDaoTest {
 
     @Test
     fun `Test reservation info`() {
-        val testId = save(TEST_ITEM)
-        val mockId = save(MOCK_ITEM)
+        val testId = jdbcTemplate.save(TEST_ITEM)
+        val mockId = jdbcTemplate.save(MOCK_ITEM)
         val shoppingCart = "test-shopping-cart-id"
         val reserveTime = LocalDateTime.now().minusMinutes(10).truncatedTo(ChronoUnit.SECONDS)
         dao.reserveItem(shoppingCart, testId, 1, reserveTime)
@@ -234,8 +236,8 @@ class WarehouseDaoTest {
 
     @Test
     fun `Test cancel reservation`() {
-        val testId = save(TEST_ITEM)
-        val mockId = save(MOCK_ITEM)
+        val testId = jdbcTemplate.save(TEST_ITEM)
+        val mockId = jdbcTemplate.save(MOCK_ITEM)
         val shoppingCart = "test-shopping-cart-id"
         val reserveTime = LocalDateTime.now().minusMinutes(10).truncatedTo(ChronoUnit.SECONDS)
         dao.reserveItem(shoppingCart, testId, 1, reserveTime)
@@ -243,7 +245,7 @@ class WarehouseDaoTest {
         dao.reserveItem(shoppingCart, mockId, 3, reserveTime.plusMinutes(2))
         dao.reserveItem(shoppingCart, testId, 1, reserveTime.plusMinutes(3))
 
-        val itemsAfterReservation = listOf(testId, mockId).map { persistedItem(it) }
+        val itemsAfterReservation = listOf(testId, mockId).map { jdbcTemplate.persistedItem(it) }
         assertThat(itemsAfterReservation).usingRecursiveComparison().ignoringFields("id")
             .isEqualTo(listOf(TEST_ITEM.minusItems(2), MOCK_ITEM.minusItems(5)))
 
@@ -254,7 +256,7 @@ class WarehouseDaoTest {
             .containsExactly(tuple(shoppingCart, testId, 2), tuple(shoppingCart, mockId, 5))
         assertThat(dao.isReservationProcessed(shoppingCart)).isTrue
 
-        val itemsAfterCancellation = listOf(testId, mockId).map { persistedItem(it) }
+        val itemsAfterCancellation = listOf(testId, mockId).map { jdbcTemplate.persistedItem(it) }
         assertThat(itemsAfterCancellation).usingRecursiveComparison().ignoringFields("id")
             .isEqualTo(listOf(TEST_ITEM, MOCK_ITEM))
 
@@ -270,8 +272,8 @@ class WarehouseDaoTest {
 
     @Test
     fun `Test purchase reservation`() {
-        val testId = save(TEST_ITEM)
-        val mockId = save(MOCK_ITEM)
+        val testId = jdbcTemplate.save(TEST_ITEM)
+        val mockId = jdbcTemplate.save(MOCK_ITEM)
         val shoppingCart = "test-shopping-cart-id"
         val reserveTime = LocalDateTime.now().minusMinutes(10).truncatedTo(ChronoUnit.SECONDS)
         dao.reserveItem(shoppingCart, testId, 1, reserveTime)
@@ -279,7 +281,7 @@ class WarehouseDaoTest {
         dao.reserveItem(shoppingCart, mockId, 3, reserveTime.plusMinutes(2))
         dao.reserveItem(shoppingCart, testId, 1, reserveTime.plusMinutes(3))
 
-        val itemsAfterReservation = listOf(testId, mockId).map { persistedItem(it) }
+        val itemsAfterReservation = listOf(testId, mockId).map { jdbcTemplate.persistedItem(it) }
         assertThat(itemsAfterReservation).usingRecursiveComparison().ignoringFields("id")
             .isEqualTo(listOf(TEST_ITEM.minusItems(2), MOCK_ITEM.minusItems(5)))
 
@@ -290,7 +292,7 @@ class WarehouseDaoTest {
             .containsExactly(tuple(shoppingCart, testId, 2), tuple(shoppingCart, mockId, 5))
         assertThat(dao.isReservationProcessed(shoppingCart)).isTrue
 
-        val itemsAfterPurchase = listOf(testId, mockId).map { persistedItem(it) }
+        val itemsAfterPurchase = listOf(testId, mockId).map { jdbcTemplate.persistedItem(it) }
         assertThat(itemsAfterPurchase).usingRecursiveComparison().ignoringFields("id")
             .isEqualTo(itemsAfterReservation)
 
@@ -302,31 +304,6 @@ class WarehouseDaoTest {
                 tuple(mockId, 5, reserveTime.plusMinutes(1), reserveTime.plusMinutes(2), ReserveStatus.RESERVED),
                 tuple(mockId, 5, purchaseTime, purchaseTime, ReserveStatus.PAID)
             )
-    }
-
-    private fun save(supplier: Supplier): Int {
-        val keyHolder = GeneratedKeyHolder()
-        jdbcTemplate.update(
-            "insert into suppliers(name, description) values (:name, :description)",
-            MapSqlParameterSource(mapOf("name" to supplier.name, "description" to supplier.description)),
-            keyHolder,
-            arrayOf("id")
-        )
-        return keyHolder.key as Int
-    }
-
-    private fun save(item: GoodsItem): Int {
-        val keyHolder = GeneratedKeyHolder()
-        jdbcTemplate.update("insert into goods(name, category, amount, weight) values (:n, :c, :a, :w)",
-            MapSqlParameterSource(mapOf("n" to item.name, "c" to item.category.name, "a" to item.amount.n, "w" to item.weight)),
-            keyHolder,
-            arrayOf("id")
-        )
-        return keyHolder.key as Int
-    }
-
-    private fun persistedItem(id: Int): GoodsItem {
-        return jdbcTemplate.queryForObject("select * from goods where id = :id", mapOf("id" to id), RowMappers.GoodsItemRowMapper)!!
     }
 
     private fun GoodsItem.plusItems(n: Int) = this.copy(amount = Amount(amount.n + n))
