@@ -1,0 +1,17 @@
+server:
+  port: 8081
+  shutdown: graceful
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/db_warehouse
+    username: db-user
+    password: db-pwd
+    hikari:
+      schema: warehouse

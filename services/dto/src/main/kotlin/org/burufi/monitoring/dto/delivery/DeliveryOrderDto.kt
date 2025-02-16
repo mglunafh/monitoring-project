@@ -1,6 +1,5 @@
-package org.burufi.monitoring.delivery.dto
+package org.burufi.monitoring.dto.delivery
 
-import org.burufi.monitoring.delivery.model.OrderStatus
 import java.time.LocalDateTime
 
 data class DeliveryOrderDto(
@@ -9,7 +8,7 @@ data class DeliveryOrderDto(
     val distance: Int,
     val transportMark: String,
     val orderTime: LocalDateTime,
-    val status: OrderStatus,
+    val status: String,     // order status
     val departureTime: LocalDateTime?,
     val arrivalTime: LocalDateTime?
 )

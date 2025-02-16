@@ -18,6 +18,18 @@ services:
     ports:
       - "3000:3000"
 
+  db-warehouse:
+    image: postgres:16
+    container_name: db-warehouse
+    environment:
+      POSTGRES_DB: db_warehouse
+      POSTGRES_USER: db-user
+      POSTGRES_PASSWORD: db-pwd
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./db-warehouse-init:/docker-entrypoint-initdb.d
+
   db-delivery:
     image: postgres:16
     container_name: db-delivery
@@ -30,8 +42,23 @@ services:
     volumes:
       - ./db-delivery-init:/docker-entrypoint-initdb.d
 
+  warehouse:
+    image: monitoring-warehouse:0.3
+    container_name: srv-warehouse
+    cpus: 1.5
+    mem_limit: 750m
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-warehouse:5432/db_warehouse
+      SPRING_DATASOURCE_USERNAME: db-user
+      SPRING_DATASOURCE_PASSWORD: db-pwd
+      SPRING_DATASOURCE_HIKARI_SCHEMA: warehouse    # <-- this is actually helpful to make default schema work
+    depends_on:
+      - db-warehouse
+
   delivery:
-    image: monitoring-delivery:0.2
+    image: monitoring-delivery:0.3
     container_name: srv-delivery
     cpus: 1.5
     mem_limit: 750m
@@ -41,6 +68,6 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db-delivery:5432/db_delivery
       SPRING_DATASOURCE_USERNAME: db-user
       SPRING_DATASOURCE_PASSWORD: db-pwd
-      SPRING_DATASOURCE_HIKARI_SCHEMA: delivery       # <-- this is actually helpful to make default schema work
+      SPRING_DATASOURCE_HIKARI_SCHEMA: delivery
     depends_on:
       - db-delivery

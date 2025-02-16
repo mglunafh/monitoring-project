@@ -5,12 +5,28 @@
 - `IPMN-10` -- Monitoring
   - `IPMN-17` -- add logging to 'Deliveries'
   - `IPMN-18` -- add tracing to 'Deliveries'
+  - `IPMN-21` -- deploy grafana with dashboards (https://stackoverflow.com/questions/63518460/grafana-import-dashboard-as-part-of-docker-compose)
+- `IPMN-26` -- think about extracting exceptions into a separate module 
 
 ---------
 
 ### Done
 
-- `IPMN-11` -- added Prometheus, Grafana to docker-compose, added 
+- `IPMN-20` -- implement 'Warehouse' app
+- `IPMN-34` -- warehouse integration test
+- `IPMN-33` -- validation constraints on shopping cart id
+- `IPMN-32` -- add 'Get shopping cart info' endpoint
+- `IPMN-30` -- Incorporated PSQLException data into database error processing
+- `IPMN-31` -- add 'Buy out shopping cart' endpoint
+- `IPMN-29` -- add 'Cancel shopping cart' endpoint
+- `IPMN-28` -- add 'Reserve a quantity of item' endpoint
+- `IPMN-22` -- add JDBC-layer tests
+- `IPMN-24` -- add Warehouse to the compose file
+- `IPMN-27` -- introduce 'Contract info' endpoint
+- `IPMN-23` -- introduce 'Contract' entity, add 'Add contract' endpoint
+- `IPMN-25` -- extract DTOs into a common subproject
+- `IPMN-21` -- add JDBC-based DAO layer
+- `IPMN-11` -- added Prometheus, Grafana to docker-compose, added
 - `IPMN-2` -- implement 'Deliveries' service
 - `IPMN-16` -- BUG '/delivery/stats' somehow always shows 'SENT' status
 - `IPMN-19` -- add 'shoppingCartId' to the create-delivery-response
