@@ -1,12 +1,15 @@
 plugins {
-    kotlin("jvm")
-    kotlin("plugin.spring")
-    id("org.springframework.boot")
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.spring)
+    alias(libs.plugins.springBoot)
 }
 
 val mockitoAgent = configurations.create("mockitoAgent")
 
 dependencies {
+    implementation(platform(libs.bom.springBoot))
+    testImplementation(platform(libs.bom.testcontainers))
+
     implementation(project(":dto"))
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
@@ -21,9 +24,9 @@ dependencies {
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:postgresql")
     testImplementation("org.assertj:assertj-core")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
+    testImplementation(libs.mockito.kotlin)
 
-    mockitoAgent("org.mockito:mockito-core:5.14.2") {     // Mockito version taken from the Spring Boot BOM 3.4.0
+    mockitoAgent(libs.mockito) {
         isTransitive = false
     }
 }
@@ -31,4 +34,15 @@ dependencies {
 tasks.test {
     // Loads mockito-core library as a Java agent during test start-up
     jvmArgs("-javaagent:${mockitoAgent.asPath}")
+}
+
+tasks.bootBuildImage {
+    imageName = "monitoring-${project.name}:$version"
+
+    environment = mapOf(
+        "BP_JVM_VERSION" to "21",
+        "BP_JVM_CDS_ENABLED" to "false",
+        "BP_SPRING_CLOUD_BINDINGS_DISABLED" to "true",
+        "BPL_SPRING_CLOUD_BINDINGS_DISABLED" to "true"
+    )
 }

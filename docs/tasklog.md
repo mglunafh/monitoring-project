@@ -13,6 +13,7 @@
 
 ### Done
 
+- `IPMN-35` -- Organize dependency version management with libs.versions.toml
 - `IPMN-20` -- implement 'Warehouse' app
 - `IPMN-34` -- warehouse integration test
 - `IPMN-33` -- validation constraints on shopping cart id

@@ -1,7 +1,7 @@
 plugins {
-    kotlin("jvm")
+    alias(libs.plugins.kotlin.jvm)
 }
 
 dependencies {
-    compileOnly("jakarta.validation:jakarta.validation-api")
+    compileOnly(libs.jakarta.validation)
 }

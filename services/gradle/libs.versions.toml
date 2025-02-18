@@ -1,0 +1,20 @@
+[versions]
+kotlin = "2.1.0"
+springBoot = "3.4.0"
+testcontainers = "1.20.4"
+mockito = "5.14.2"              # Mockito version taken from the Spring Boot BOM 3.4.0
+mockito-kotlin = "5.4.0"
+jakarta-validation = "3.0.2"    # Jakarta Validation API version taken from Spring Boot BOM 3.4.0
+
+[libraries]
+bom-springBoot = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "springBoot" }
+bom-testcontainers = { module = "org.testcontainers:testcontainers-bom", version.ref = "testcontainers" }
+mockito = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockito-kotlin" }
+jakarta-validation = { module = "jakarta.validation:jakarta.validation-api", version.ref = "jakarta-validation" }
+
+[plugins]
+springBoot = { id = "org.springframework.boot", version.ref = "springBoot" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-spring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
+kotlin-jpa = { id = "org.jetbrains.kotlin.plugin.jpa", version.ref = "kotlin" }
