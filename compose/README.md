@@ -1,6 +1,7 @@
 ## List of services and their dependencies
 
 - `db-warehouse`
+- `db-shop`
 - `db-delivery`
 - `srv-warehouse`
 - `srv-delivery`
@@ -12,6 +13,10 @@
 
 ```shell
 docker exec -it db-warehouse psql -d db_warehouse -U db-user
+```
+
+```shell
+docker exec -it db-shop psql -d db_shop -U db-user
 ```
 
 ```shell

@@ -1,14 +1,34 @@
 [versions]
 kotlin = "2.1.0"
 springBoot = "3.4.0"
+ktor = "3.1.0"
+jakarta-validation = "3.0.2"    # Jakarta Validation API version taken from Spring Boot BOM 3.4.0
+exposed = "0.59.0"
+h2 = "2.3.232"
+postgresql = "42.7.5"
+logback = "1.5.12"
 testcontainers = "1.20.4"
 mockito = "5.14.2"              # Mockito version taken from the Spring Boot BOM 3.4.0
 mockito-kotlin = "5.4.0"
-jakarta-validation = "3.0.2"    # Jakarta Validation API version taken from Spring Boot BOM 3.4.0
 
 [libraries]
 bom-springBoot = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "springBoot" }
 bom-testcontainers = { module = "org.testcontainers:testcontainers-bom", version.ref = "testcontainers" }
+
+ktor-server-core = { module = "io.ktor:ktor-server-core-jvm", version.ref = "ktor" }
+ktor-server-netty = { module = "io.ktor:ktor-server-netty", version.ref = "ktor" }
+ktor-server-auth = { module = "io.ktor:ktor-server-auth", version.ref = "ktor" }
+ktor-server-configYaml = { module = "io.ktor:ktor-server-config-yaml", version.ref = "ktor" }
+ktor-server-contentNegotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor" }
+ktor-serializationKotlinxJson = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed" }
+exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposed" }
+exposed-javaTime = { module = "org.jetbrains.exposed:exposed-java-time", version.ref = "exposed" }
+jdbc-postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
+jdbc-h2 = { module = "com.h2database:h2", version.ref = "h2" }
+hikariPool = { module = "com.zaxxer:HikariCP", version = "6.2.1" }
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+
 mockito = { module = "org.mockito:mockito-core", version.ref = "mockito" }
 mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockito-kotlin" }
 jakarta-validation = { module = "jakarta.validation:jakarta.validation-api", version.ref = "jakarta-validation" }
@@ -18,3 +38,5 @@ springBoot = { id = "org.springframework.boot", version.ref = "springBoot" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-spring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
 kotlin-jpa = { id = "org.jetbrains.kotlin.plugin.jpa", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+ktor = { id = "io.ktor.plugin", version.ref = "ktor" }

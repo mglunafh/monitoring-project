@@ -1,0 +1,6 @@
+ktor:
+    application:
+        modules:
+            - org.burufi.monitoring.shop.ShopAppKt.module
+    deployment:
+        port: 8082

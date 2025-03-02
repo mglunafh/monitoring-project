@@ -7,12 +7,16 @@
   - `IPMN-17` -- add logging to 'Deliveries'
   - `IPMN-18` -- add tracing to 'Deliveries'
   - `IPMN-21` -- deploy grafana with dashboards (https://stackoverflow.com/questions/63518460/grafana-import-dashboard-as-part-of-docker-compose)
-- `IPMN-26` -- think about extracting exceptions into a separate module 
+- `IPMN-26` -- think about extracting exceptions into a separate module
+- `IPMN-36` -- implement 'Shop' app
+  - `IPMN-37` -- add users, basic authentication
+  - `IPMN-39` -- database configuration via application properties 
 
 ---------
 
 ### Done
 
+- `IPMN-38` -- shop: add database support via Exposed
 - `IPMN-35` -- Organize dependency version management with libs.versions.toml
 - `IPMN-20` -- implement 'Warehouse' app
 - `IPMN-34` -- warehouse integration test

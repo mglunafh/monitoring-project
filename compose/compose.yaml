@@ -13,6 +13,18 @@ services:
     volumes:
       - ./db-warehouse-init:/docker-entrypoint-initdb.d
 
+  db-shop:
+    image: postgres:16
+    container_name: db-shop
+    environment:
+      POSTGRES_DB: db_shop
+      POSTGRES_USER: db-user
+      POSTGRES_PASSWORD: db-pwd
+    ports:
+      - "5434:5432"
+    volumes:
+      - ./db-shop-init:/docker-entrypoint-initdb.d
+
   db-delivery:
     image: postgres:16
     container_name: db-delivery
